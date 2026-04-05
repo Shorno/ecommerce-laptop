@@ -15,17 +15,20 @@ interface CategorySectionProps {
 
 export function CategorySection({ category }: CategorySectionProps) {
     return (
-        <section className="mb-12">
+        <section className="mb-10">
             {/* Category Header */}
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl md:text-3xl font-bold">
-                    {category.name}
-                </h2>
+            <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                    <div className="w-1 h-7 bg-tech-accent rounded-full" />
+                    <h2 className="text-xl md:text-2xl font-bold text-foreground">
+                        {category.name}
+                    </h2>
+                </div>
 
                 <Button
                     asChild
                     variant="ghost"
-                    className="gap-2"
+                    className="gap-2 text-tech-accent hover:text-tech-accent/80 hover:bg-tech-accent/5"
                 >
                     <Link href={`/products/${category.slug}`}>
                         See All
@@ -35,7 +38,7 @@ export function CategorySection({ category }: CategorySectionProps) {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {category.products.map((product) => (
                     <ProductCard key={product.id} product={product} />
                 ))}

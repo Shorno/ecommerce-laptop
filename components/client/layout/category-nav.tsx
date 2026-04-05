@@ -16,21 +16,21 @@ interface CategoryNavProps {
 
 export default function CategoryNav({ categories }: CategoryNavProps) {
     return (
-        <div className="hidden lg:block border-b bg-muted/30">
+        <div className="hidden lg:block border-b bg-card shadow-sm">
             <div className="container mx-auto">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                     <Link href="/products">
-                        <Button variant="default" className="h-12 gap-2 rounded-none">
+                        <Button variant="default" className="h-11 gap-2 rounded-none bg-tech-accent hover:bg-tech-accent/90 text-white">
                             <LayoutGrid className="h-4 w-4" />
                             All Products
                         </Button>
                     </Link>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5 overflow-x-auto">
                         {categories.map((category) => (
                             <Link key={category.name} href={`/products/${category.slug}`}>
-                                <Button variant="ghost" className="h-12 gap-2">
-                                    <div className="relative h-5 w-5 rounded-full overflow-hidden">
+                                <Button variant="ghost" className="h-11 gap-2 text-foreground/80 hover:text-tech-accent hover:bg-tech-accent/5 transition-colors">
+                                    <div className="relative h-5 w-5 rounded-full overflow-hidden flex-shrink-0">
                                         <Image
                                             src={category.image}
                                             alt={category.name}
@@ -38,7 +38,7 @@ export default function CategoryNav({ categories }: CategoryNavProps) {
                                             className="object-cover"
                                         />
                                     </div>
-                                    {category.name}
+                                    <span className="whitespace-nowrap text-sm font-medium">{category.name}</span>
                                 </Button>
                             </Link>
                         ))}
