@@ -23,9 +23,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 interface DeleteSubcategoryDialogProps {
     subcategory: SubCategory
+    trigger?: React.ReactNode
 }
 
-export default function DeleteSubcategoryDialog({subcategory}: DeleteSubcategoryDialogProps) {
+export default function DeleteSubcategoryDialog({subcategory, trigger}: DeleteSubcategoryDialogProps) {
     const [open, setOpen] = React.useState(false)
     const queryClient = useQueryClient()
 
@@ -61,14 +62,16 @@ export default function DeleteSubcategoryDialog({subcategory}: DeleteSubcategory
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-destructive hover:text-destructive"
-                >
-                    <Trash2 className="h-4 w-4 mr-2"/>
-                    Delete
-                </Button>
+                {trigger || (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-destructive hover:text-destructive"
+                    >
+                        <Trash2 className="h-4 w-4 mr-2"/>
+                        Delete
+                    </Button>
+                )}
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
