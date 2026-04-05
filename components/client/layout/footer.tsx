@@ -17,12 +17,12 @@ export function Footer() {
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                                    <Image  src={"/logos/site-logo.png"} alt={"KhaatiBazar-logo"} width={50} height={50} />
+                                    <Image  src={"/logos/site-logo.png"} alt={"LaptopBD-logo"} width={50} height={50} />
                                 </div>
-                                <h2 className="font-bold text-lg text-foreground">KhaatiBazar Shop</h2>
+                                <h2 className="font-bold text-lg text-foreground">LaptopBD</h2>
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                Your trusted online shopping destination for organic and natural products.
+                                Your trusted online destination for laptops, electronics, and tech accessories.
                             </p>
 
                             {/* Contact Information */}
@@ -42,7 +42,7 @@ export function Footer() {
                                         href="mailto:support@ecommerce.com"
                                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                                     >
-                                        support@khaatibazar.com
+                                        support@laptopbd.com
                                     </a>
                                 </div>
                             </div>
@@ -108,7 +108,7 @@ export function Footer() {
 
                     {/* Bottom Section */}
                     <p className="text-xs text-muted-foreground text-center">
-                        &copy; 2025 KhaatiBazar. All rights reserved.
+                        &copy; 2025 LaptopBD. All rights reserved.
                     </p>
                 </div>
             </div>

@@ -16,6 +16,6 @@ export const PAYMENT_CONFIG = {
 } as const;
 
 export const MERCHANT_INFO = {
-    name: "KhaatiBazar",
+    name: "LaptopBD",
     logo: "/images/site-logo.png",
 } as const;

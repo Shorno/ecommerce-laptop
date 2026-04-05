@@ -33,7 +33,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         Our Products
                     </h1>
                     <p className="opacity-60">
-                        Browse our premium selection of organic foods
+                        Browse our collection of laptops and electronics
                     </p>
                 </div>
 
