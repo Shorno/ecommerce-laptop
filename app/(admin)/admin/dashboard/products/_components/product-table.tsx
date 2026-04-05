@@ -24,8 +24,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import NewProductDialog from "@/app/(admin)/admin/dashboard/products/_components/new-product-dialog"
-import {useTranslations} from "next-intl"
+import Link from "next/link"
+import {Plus} from "lucide-react"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -36,8 +36,6 @@ export default function ProductTable<TData, TValue>({
                                                          columns,
                                                          data,
                                                      }: DataTableProps<TData, TValue>) {
-    const t = useTranslations('products');
-    const tCommon = useTranslations('common');
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -66,14 +64,19 @@ export default function ProductTable<TData, TValue>({
         <div className="w-full">
             <div className="flex items-center justify-between py-4 gap-2">
                 <Input
-                    placeholder={t('filterByName')}
+                    placeholder="Filter by name..."
                     value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
                         table.getColumn("name")?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                 />
-                <NewProductDialog/>
+                <Button asChild>
+                    <Link href="/admin/dashboard/products/new">
+                        <Plus className="h-4 w-4 mr-2" />
+                        New Product
+                    </Link>
+                </Button>
             </div>
             <div className="rounded-md border">
                 <Table>
@@ -118,7 +121,7 @@ export default function ProductTable<TData, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    {t('noResults')}
+                                    No results.
                                 </TableCell>
                             </TableRow>
                         )}
@@ -133,7 +136,7 @@ export default function ProductTable<TData, TValue>({
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
                     >
-                        {tCommon('previous')}
+                        Previous
                     </Button>
                     <Button
                         variant="outline"
@@ -141,7 +144,7 @@ export default function ProductTable<TData, TValue>({
                         onClick={() => table.nextPage()}
                         disabled={!table.getCanNextPage()}
                     >
-                        {tCommon('next')}
+                        Next
                     </Button>
                 </div>
             </div>
