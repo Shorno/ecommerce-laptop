@@ -10,6 +10,8 @@ import {createOrder} from "@/app/actions/order"
 import {toast} from "sonner"
 import {Card, CardContent} from "@/components/ui/card"
 import {Spinner} from "@/components/ui/spinner"
+import Link from "next/link"
+import {Home, ShieldCheck} from "lucide-react"
 
 export default function CheckoutPage() {
     const router = useRouter()
@@ -78,11 +80,31 @@ export default function CheckoutPage() {
     }
 
     return (
-        <div className="min-h-screen py-8">
+        <div className="min-h-screen py-6">
             <div className="container mx-auto max-w-7xl px-4 md:px-6">
-                <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                {/* Breadcrumb */}
+                <nav className="flex items-center gap-2 text-sm mb-5">
+                    <Link href="/" className="text-muted-foreground hover:text-tech-accent transition-colors">
+                        <Home className="h-4 w-4" />
+                    </Link>
+                    <span className="text-muted-foreground">/</span>
+                    <span className="text-foreground font-medium">Checkout</span>
+                </nav>
+
+                {/* Page Heading */}
+                <div className="flex items-center gap-3 mb-6">
+                    <h1 className="text-2xl font-bold">Checkout</h1>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        Secure checkout
+                    </div>
+                </div>
+
+                <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto items-start">
                     <ShippingForm onValidSubmit={handleValidSubmit}/>
-                    <CartReview isProcessing={isPending}/>
+                    <div className="lg:sticky lg:top-4">
+                        <CartReview isProcessing={isPending}/>
+                    </div>
                 </div>
             </div>
         </div>

@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import {Loader2, ShoppingCart, Zap} from "lucide-react"
+import {Loader2, ShoppingCart, ShoppingBag} from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -71,9 +71,9 @@ export function ProductCard({ product }: ProductCardProps) {
 
     return (
         <Link href={`/product/${product.slug}`}>
-            <Card className="group h-full flex flex-col py-0 overflow-hidden border border-border hover:border-tech-accent/30 hover:shadow-lg transition-all duration-300 cursor-pointer bg-card">
+            <Card className="group h-full flex flex-col py-0 overflow-hidden border border-border transition-all duration-300 cursor-pointer bg-card">
                 {/* Image Container */}
-                <div className="relative w-full aspect-square bg-white overflow-hidden p-3">
+                <div className="relative w-full aspect-[5/4] bg-white overflow-hidden p-2">
                     {/* Badges */}
                     <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
                         {product.isFeatured && (
@@ -99,30 +99,18 @@ export function ProductCard({ product }: ProductCardProps) {
                 </div>
 
                 {/* Content */}
-                <CardContent className="flex flex-col flex-grow p-3 md:p-4 border-t border-border/50">
+                <CardContent className="flex flex-col flex-grow p-3 border-t border-border/50">
                     {/* Product Name */}
-                    <h3 className="text-sm font-medium mb-2 line-clamp-2 text-foreground group-hover:text-tech-accent transition-colors leading-snug min-h-[2.5rem]">
+                    <h3 className="text-xs sm:text-sm font-medium mb-1.5 line-clamp-2 text-foreground group-hover:text-tech-accent transition-colors leading-snug">
                         {product.name}
                     </h3>
 
-                    {/* Size */}
-                    <p className="text-xs text-muted-foreground mb-2">
-                        {product.size}
-                    </p>
-
                     {/* Price */}
-                    <div className="mb-3 mt-auto">
-                        <p className="text-lg md:text-xl font-bold text-tech-accent">
+                    <div className="mb-2 mt-auto">
+                        <p className="text-base font-bold text-tech-accent">
                             {formatPrice(product.price)}
                         </p>
                     </div>
-
-                    {/* Stock indicator */}
-                    {!isOutOfStock && (
-                        <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-3 font-medium">
-                            In Stock
-                        </p>
-                    )}
 
                     {/* Action Buttons */}
                     <div className="flex gap-2">
@@ -131,7 +119,7 @@ export function ProductCard({ product }: ProductCardProps) {
                             disabled={isOutOfStock}
                             variant="outline"
                             size="icon"
-                            className="h-9 w-9 border-border hover:border-tech-accent hover:text-tech-accent transition-colors disabled:opacity-50"
+                            className="hidden sm:flex h-9 w-9 border-border hover:border-tech-accent hover:text-tech-accent transition-colors disabled:opacity-50"
                         >
                             <ShoppingCart size={15} />
                         </Button>
@@ -148,7 +136,7 @@ export function ProductCard({ product }: ProductCardProps) {
                                 </>
                             ) : (
                                 <>
-                                    <Zap size={14} />
+                                    <ShoppingBag size={14} />
                                     Buy Now
                                 </>
                             )}

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
-import { CreditCard, Banknote } from "lucide-react"
+import { CreditCard, Banknote, Truck, ShieldCheck } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -70,7 +70,10 @@ export default function ShippingForm({ onValidSubmit }: ShippingFormProps) {
     return (
         <Card className="rounded-sm">
             <CardHeader>
-                <CardTitle>Shipping Information</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-tech-accent" />
+                    Shipping Information
+                </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
                 {/* Form Fields */}
@@ -312,7 +315,10 @@ export default function ShippingForm({ onValidSubmit }: ShippingFormProps) {
 
                 {/* Payment Method Selection - At the End */}
                 <div className="pt-4 border-t">
-                    <h3 className="text-sm font-semibold mb-3">Payment Method</h3>
+                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-tech-accent" />
+                        Payment Method
+                    </h3>
                     <RadioGroup
                         value={paymentType}
                         onValueChange={(value: "online" | "cod") => setPaymentType(value)}

@@ -14,9 +14,10 @@ interface ProductsGridProps {
         inStock?: string
         search?: string
     }
+    categoryName?: string
 }
 
-export async function ProductsGrid({ searchParams }: ProductsGridProps) {
+export async function ProductsGrid({ searchParams, categoryName }: ProductsGridProps) {
     const products = await getProducts(searchParams)
 
     const categories = await getActiveCategories()
@@ -25,18 +26,27 @@ export async function ProductsGrid({ searchParams }: ProductsGridProps) {
         : []
 
     return (
-        <div className="space-y-6">
-            {/* Sort and Results Count */}
-            <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
-                <p className="text-sm text-neutral-600">
-                    {products.length} {products.length === 1 ? "product" : "products"} found
-                </p>
+        <div className="space-y-4">
+            {/* Header Bar */}
+            <div className="flex items-center justify-between gap-4 border rounded-lg px-4 py-2.5 bg-card">
+                <div className="flex items-center gap-3">
+                    {categoryName && (
+                        <h1 className="text-sm font-semibold">
+                            Products of {categoryName}
+                        </h1>
+                    )}
+                </div>
                 <ProductsSort
                     categories={categories}
                     subCategories={subCategories}
                     currentCategorySlug={searchParams.category}
                 />
             </div>
+
+            {/* Product Count */}
+            <p className="text-sm text-muted-foreground">
+                Showing {products.length} {products.length === 1 ? "product" : "products"}
+            </p>
 
             {/* Products Grid */}
             {products.length === 0 ? (
@@ -45,7 +55,7 @@ export async function ProductsGrid({ searchParams }: ProductsGridProps) {
                     <p className="text-neutral-400 text-sm">Try adjusting your filters</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                     {products.map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}

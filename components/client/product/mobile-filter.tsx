@@ -139,97 +139,35 @@ export function MobileFilter({ categories, subCategories, currentCategorySlug }:
 
                 <ScrollArea className="h-[calc(100vh-80px)]">
                     <div className="px-6 py-4 space-y-6">
-                        {/* Categories */}
-                        {!currentCategorySlug && categories.length > 0 && (
-                            <div className="space-y-3">
-                                <Label className="text-sm font-semibold">Category</Label>
-                                <RadioGroup
-                                    value={searchParams.get("category") || ""}
-                                    onValueChange={handleCategoryChange}
-                                >
-                                    {categories.map((category) => (
-                                        <div key={category.id} className="flex items-center space-x-2">
-                                            <RadioGroupItem value={category.slug} id={`mobile-${category.slug}`} />
-                                            <Label
-                                                htmlFor={`mobile-${category.slug}`}
-                                                className="text-sm font-normal cursor-pointer"
-                                            >
-                                                {category.name}
-                                            </Label>
-                                        </div>
-                                    ))}
-                                </RadioGroup>
-                            </div>
-                        )}
-
-                        {/* Sub Categories */}
-                        {subCategories.length > 0 && (
-                            <>
-                                {!currentCategorySlug && categories.length > 0 && <Separator />}
-                                <div className="space-y-3">
-                                    <Label className="text-sm font-semibold">Sub Category</Label>
-                                    <div className="space-y-2">
-                                        {subCategories.map((subCategory) => (
-                                            <div key={subCategory.id} className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id={`mobile-${subCategory.slug}`}
-                                                    checked={currentSubcategorySlug === subCategory.slug}
-                                                    onCheckedChange={(checked) =>
-                                                        handleSubCategoryChange(checked as boolean, subCategory.slug)
-                                                    }
-                                                />
-                                                <Label
-                                                    htmlFor={`mobile-${subCategory.slug}`}
-                                                    className="text-sm font-normal cursor-pointer"
-                                                >
-                                                    {subCategory.name}
-                                                </Label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </>
-                        )}
-
                         {/* Price Range */}
-                        <Separator />
                         <div className="space-y-3">
                             <Label className="text-sm font-semibold">Price Range</Label>
-                            <div className="space-y-3">
-                                <div className="space-y-2">
-                                    <Label htmlFor="mobile-minPrice" className="text-xs text-neutral-600">
-                                        Min Price (৳)
-                                    </Label>
-                                    <Input
-                                        id="mobile-minPrice"
-                                        type="number"
-                                        placeholder="0"
-                                        value={minPrice}
-                                        onChange={(e) => setMinPrice(e.target.value)}
-                                        className="h-10"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="mobile-maxPrice" className="text-xs text-neutral-600">
-                                        Max Price (৳)
-                                    </Label>
-                                    <Input
-                                        id="mobile-maxPrice"
-                                        type="number"
-                                        placeholder="10000"
-                                        value={maxPrice}
-                                        onChange={(e) => setMaxPrice(e.target.value)}
-                                        className="h-10"
-                                    />
-                                </div>
-                                <Button
-                                    onClick={handlePriceFilter}
-                                    className="w-full"
-                                    size="sm"
-                                >
-                                    Apply Price
-                                </Button>
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    id="mobile-minPrice"
+                                    type="number"
+                                    placeholder="Min"
+                                    value={minPrice}
+                                    onChange={(e) => setMinPrice(e.target.value)}
+                                    className="h-10"
+                                />
+                                <span className="text-muted-foreground text-xs">–</span>
+                                <Input
+                                    id="mobile-maxPrice"
+                                    type="number"
+                                    placeholder="Max"
+                                    value={maxPrice}
+                                    onChange={(e) => setMaxPrice(e.target.value)}
+                                    className="h-10"
+                                />
                             </div>
+                            <Button
+                                onClick={handlePriceFilter}
+                                className="w-full"
+                                size="sm"
+                            >
+                                Apply
+                            </Button>
                         </div>
 
                         {/* Stock Status */}
