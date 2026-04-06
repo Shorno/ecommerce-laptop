@@ -22,6 +22,7 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import {Input} from "@/components/ui/input";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import ImageUploader from "@/components/ImageUploader";
 import {Loader} from "lucide-react";
 import {createFeaturedImageSchema} from "@/lib/schemas/featured.scheam";
@@ -67,6 +68,7 @@ export default function NewFeaturedImageDialog() {
             subtitle: "",
             cta: "",
             ctaLink: "",
+            placement: "carousel" as "carousel" | "side",
         },
         validators: {
             onSubmit: createFeaturedImageSchema,
@@ -84,7 +86,7 @@ export default function NewFeaturedImageDialog() {
                     Featured Image
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Create New Featured Image</DialogTitle>
                     <DialogDescription>
@@ -98,118 +100,106 @@ export default function NewFeaturedImageDialog() {
                         e.stopPropagation();
                         form.handleSubmit();
                     }}
-                    className="space-y-4"
                 >
-                    <form.Field name="image">
-                        {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                            return (
-                                <Field data-invalid={isInvalid}>
-                                    <FieldLabel htmlFor={field.name}>Image</FieldLabel>
-                                    <ImageUploader
-                                        value={field.state.value}
-                                        onChange={field.handleChange}
-                                        folder="featured-images"
-                                        maxSizeMB={5}
-                                    />
-                                    <FieldDescription>Upload an image (max 5MB)</FieldDescription>
-                                    {isInvalid && <FieldError errors={field.state.meta.errors}/>}
-                                </Field>
-                            );
-                        }}
-                    </form.Field>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Left Column — Image */}
+                        <div>
+                            <form.Field name="image">
+                                {(field) => {
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                                    return (
+                                        <Field data-invalid={isInvalid}>
+                                            <FieldLabel htmlFor={field.name}>Banner Image</FieldLabel>
+                                            <ImageUploader
+                                                value={field.state.value}
+                                                onChange={field.handleChange}
+                                                folder="featured-images"
+                                                maxSizeMB={5}
+                                            />
+                                            <FieldDescription>Upload an image (max 5MB)</FieldDescription>
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
+                                        </Field>
+                                    );
+                                }}
+                            </form.Field>
+                        </div>
 
-                    {/* Title */}
-                    <form.Field name="title">
-                        {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                            return (
-                                <Field data-invalid={isInvalid}>
-                                    <FieldLabel htmlFor={field.name}>Title *</FieldLabel>
-                                    <Input
-                                        id={field.name}
-                                        name={field.name}
-                                        value={field.state.value}
-                                        onBlur={field.handleBlur}
-                                        onChange={(e) => field.handleChange(e.target.value)}
-                                        aria-invalid={isInvalid}
-                                        placeholder="Promo banner"
-                                        autoComplete="off"
-                                    />
-                                    {isInvalid && <FieldError errors={field.state.meta.errors}/>}
-                                </Field>
-                            );
-                        }}
-                    </form.Field>
+                        {/* Right Column — Details */}
+                        <div className="space-y-4">
+                            <form.Field name="title">
+                                {(field) => {
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                                    return (
+                                        <Field data-invalid={isInvalid}>
+                                            <FieldLabel htmlFor={field.name}>Title *</FieldLabel>
+                                            <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} aria-invalid={isInvalid} placeholder="Promo banner" autoComplete="off" />
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
+                                        </Field>
+                                    );
+                                }}
+                            </form.Field>
 
-                    {/* Subtitle */}
-                    <form.Field name="subtitle">
-                        {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                            return (
-                                <Field data-invalid={isInvalid}>
-                                    <FieldLabel htmlFor={field.name}>Subtitle</FieldLabel>
-                                    <Input
-                                        id={field.name}
-                                        name={field.name}
-                                        value={field.state.value}
-                                        onBlur={field.handleBlur}
-                                        onChange={(e) => field.handleChange(e.target.value)}
-                                        aria-invalid={isInvalid}
-                                        placeholder="Subheading (optional)"
-                                        autoComplete="off"
-                                    />
-                                    {isInvalid && <FieldError errors={field.state.meta.errors}/>}
-                                </Field>
-                            );
-                        }}
-                    </form.Field>
+                            <form.Field name="subtitle">
+                                {(field) => {
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                                    return (
+                                        <Field data-invalid={isInvalid}>
+                                            <FieldLabel htmlFor={field.name}>Subtitle</FieldLabel>
+                                            <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} aria-invalid={isInvalid} placeholder="Subheading (optional)" autoComplete="off" />
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
+                                        </Field>
+                                    );
+                                }}
+                            </form.Field>
 
-                    {/* CTA */}
-                    <form.Field name="cta">
-                        {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                            return (
-                                <Field data-invalid={isInvalid}>
-                                    <FieldLabel htmlFor={field.name}>Call to Action (CTA) *</FieldLabel>
-                                    <Input
-                                        id={field.name}
-                                        name={field.name}
-                                        value={field.state.value}
-                                        onBlur={field.handleBlur}
-                                        onChange={(e) => field.handleChange(e.target.value)}
-                                        aria-invalid={isInvalid}
-                                        placeholder="Shop now"
-                                        autoComplete="off"
-                                    />
-                                    {isInvalid && <FieldError errors={field.state.meta.errors}/>}
-                                </Field>
-                            );
-                        }}
-                    </form.Field>
+                            <div className="grid grid-cols-2 gap-4">
+                                <form.Field name="cta">
+                                    {(field) => {
+                                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                                        return (
+                                            <Field data-invalid={isInvalid}>
+                                                <FieldLabel htmlFor={field.name}>CTA *</FieldLabel>
+                                                <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} aria-invalid={isInvalid} placeholder="Shop now" autoComplete="off" />
+                                                {isInvalid && <FieldError errors={field.state.meta.errors}/>}
+                                            </Field>
+                                        );
+                                    }}
+                                </form.Field>
 
-                    {/* CTA Link */}
-                    <form.Field name="ctaLink">
-                        {(field) => {
-                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                            return (
-                                <Field data-invalid={isInvalid}>
-                                    <FieldLabel htmlFor={field.name}>CTA Link *</FieldLabel>
-                                    <Input
-                                        id={field.name}
-                                        name={field.name}
-                                        value={field.state.value}
-                                        onBlur={field.handleBlur}
-                                        onChange={(e) => field.handleChange(e.target.value)}
-                                        aria-invalid={isInvalid}
-                                        placeholder="https://example.com/shop"
-                                        autoComplete="off"
-                                    />
-                                    {isInvalid && <FieldError errors={field.state.meta.errors}/>}
-                                </Field>
-                            );
-                        }}
-                    </form.Field>
+                                <form.Field name="placement">
+                                    {(field) => {
+                                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                                        return (
+                                            <Field data-invalid={isInvalid}>
+                                                <FieldLabel htmlFor={field.name}>Placement *</FieldLabel>
+                                                <Select value={field.state.value} onValueChange={(val) => field.handleChange(val as "carousel" | "side")}>
+                                                    <SelectTrigger><SelectValue placeholder="Select placement"/></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="carousel">Main Carousel</SelectItem>
+                                                        <SelectItem value="side">Side Banner</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                {isInvalid && <FieldError errors={field.state.meta.errors}/>}
+                                            </Field>
+                                        );
+                                    }}
+                                </form.Field>
+                            </div>
+
+                            <form.Field name="ctaLink">
+                                {(field) => {
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                                    return (
+                                        <Field data-invalid={isInvalid}>
+                                            <FieldLabel htmlFor={field.name}>CTA Link *</FieldLabel>
+                                            <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} aria-invalid={isInvalid} placeholder="https://example.com/shop" autoComplete="off" />
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
+                                        </Field>
+                                    );
+                                }}
+                            </form.Field>
+                        </div>
+                    </div>
                 </form>
                 <DialogFooter>
                     <Button

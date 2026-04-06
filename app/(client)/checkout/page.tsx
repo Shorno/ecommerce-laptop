@@ -58,7 +58,7 @@ export default function CheckoutPage() {
     if (isPending) {
         return (
             <div className="min-h-screen py-8">
-                <div className="container mx-auto px-4">
+                <div className="container mx-auto max-w-7xl px-4 md:px-6">
                     <div className="max-w-2xl mx-auto">
                         <Card className="border-2">
                             <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
@@ -79,7 +79,7 @@ export default function CheckoutPage() {
 
     return (
         <div className="min-h-screen py-8">
-            <div className="container mx-auto px-4">
+            <div className="container mx-auto max-w-7xl px-4 md:px-6">
                 <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
                     <ShippingForm onValidSubmit={handleValidSubmit}/>
                     <CartReview isProcessing={isPending}/>

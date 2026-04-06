@@ -9,7 +9,7 @@ export function Footer() {
     return (
         <footer className="bg-tech-navy text-white/80 mt-16">
             {/* Main Footer Content */}
-            <div className="container mx-auto px-4 py-10 md:py-14">
+            <div className="container mx-auto max-w-7xl px-4 md:px-6 py-10 md:py-14">
                 <div className="flex flex-col gap-8 md:gap-10">
                     {/* Top Brand & Contact Section */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

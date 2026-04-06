@@ -6,7 +6,6 @@ export const createFeaturedImageSchema = z.object({
         .max(255, "Image URL must be at most 255 characters."),
     title: z
         .string()
-        .min(2, "Title must be at least 2 characters.")
         .max(100, "Title must be at most 100 characters.")
         .trim(),
     subtitle: z
@@ -18,8 +17,11 @@ export const createFeaturedImageSchema = z.object({
         .max(50, "CTA must be at most 50 characters.")
         .trim(),
     ctaLink: z
-        .url("Please enter a valid URL for the CTA link.")
-        .max(255, "URL must be at most 255 characters."),
+        .string()
+        .max(255, "URL must be at most 255 characters.")
+        .trim(),
+    placement: z
+        .enum(["carousel", "side"], { error: "Placement must be 'carousel' or 'side'." }),
 });
 
 

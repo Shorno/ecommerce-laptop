@@ -5,6 +5,7 @@ import Image from "next/image"
 import getFeaturedImages from "@/app/(admin)/admin/dashboard/featured/action/get-featured-images"
 import EditFeaturedImageDialog from "@/app/(admin)/admin/dashboard/featured/_components/edit-featured-image-dialog"
 import DeleteFeaturedImageDialog from "@/app/(admin)/admin/dashboard/featured/_components/delete-featured-image-dialog"
+import { Badge } from "@/components/ui/badge"
 import { useQuery } from "@tanstack/react-query"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -41,20 +42,30 @@ export default function FeaturedImagesCardList() {
                     />
                     <div className="absolute inset-0 bg-black/40" />
 
+                    {/* Placement badge */}
+                    <div className="absolute top-4 left-4 z-20">
+                        <Badge variant={featured.placement === "side" ? "secondary" : "default"} className="text-xs">
+                            {featured.placement === "side" ? "Side Banner" : "Carousel"}
+                        </Badge>
+                    </div>
+
                     <div className="absolute top-4 right-4 flex gap-2 z-20">
                         <EditFeaturedImageDialog featuredImage={featured}/>
                         <DeleteFeaturedImageDialog featuredImage={featured}/>
                     </div>
 
                     <div className="relative z-10 flex flex-col items-center justify-center h-full py-10 px-8 text-center text-white">
+                        {featured.title && (
                         <h3 className="text-3xl md:text-4xl font-extrabold mb-2">
                             {featured.title}
                         </h3>
+                        )}
                         {featured.subtitle && (
                             <p className="mb-4 text-lg font-medium">
                                 {featured.subtitle}
                             </p>
                         )}
+                        {featured.cta && featured.ctaLink && (
                         <a
                             href={featured.ctaLink}
                             target="_blank"
@@ -63,6 +74,7 @@ export default function FeaturedImagesCardList() {
                         >
                             {featured.cta}
                         </a>
+                        )}
                     </div>
                 </div>
             ))}

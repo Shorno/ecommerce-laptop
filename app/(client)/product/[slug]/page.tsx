@@ -72,7 +72,7 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
     }
 
     return (
-        <div className="container mx-auto px-4 py-4 md:py-6">
+        <div className="container mx-auto max-w-7xl px-4 md:px-6 py-4 md:py-6">
             {/* Back Button */}
             <div className="mb-4">
                 <Link href="/products">

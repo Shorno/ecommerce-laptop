@@ -1,13 +1,13 @@
 "use client"
-import { Button } from "@/components/ui/button"
-import { LayoutGrid } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { SubCategory } from "@/db/schema/category"
 
 interface Category {
     name: string
     slug: string
     image: string
+    subCategory: SubCategory[]
 }
 
 interface CategoryNavProps {
@@ -15,34 +15,40 @@ interface CategoryNavProps {
 }
 
 export default function CategoryNav({ categories }: CategoryNavProps) {
-    return (
-        <div className="hidden lg:block border-b bg-card shadow-sm">
-            <div className="container mx-auto">
-                <div className="flex items-center gap-1">
-                    <Link href="/products">
-                        <Button variant="default" className="h-11 gap-2 rounded-none bg-tech-accent hover:bg-tech-accent/90 text-white">
-                            <LayoutGrid className="h-4 w-4" />
-                            All Products
-                        </Button>
-                    </Link>
+    const pathname = usePathname()
+    const pathSegments = pathname.split("/").filter(Boolean)
+    const activeSubcategorySlug = pathSegments[1] || null
 
-                    <div className="flex items-center gap-0.5 overflow-x-auto">
-                        {categories.map((category) => (
-                            <Link key={category.name} href={`/${category.slug}`}>
-                                <Button variant="ghost" className="h-11 gap-2 text-foreground/80 hover:text-tech-accent hover:bg-tech-accent/5 transition-colors">
-                                    <div className="relative h-5 w-5 rounded-full overflow-hidden flex-shrink-0">
-                                        <Image
-                                            src={category.image}
-                                            alt={category.name}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                    <span className="whitespace-nowrap text-sm font-medium">{category.name}</span>
-                                </Button>
+    // Flatten all subcategories from all categories
+    const allSubcategories = categories.flatMap((cat) =>
+        cat.subCategory.map((sub) => ({
+            ...sub,
+            categorySlug: cat.slug,
+        }))
+    )
+
+    if (allSubcategories.length === 0) return null
+
+    return (
+        <div className="hidden lg:block border-b bg-card">
+            <div className="container mx-auto max-w-7xl px-4 md:px-6">
+                <div className="flex items-center gap-5 overflow-x-auto py-2.5">
+                    {allSubcategories.map((sub) => {
+                        const isActive = activeSubcategorySlug === sub.slug
+                        return (
+                            <Link
+                                key={sub.id}
+                                href={`/${sub.categorySlug}/${sub.slug}`}
+                                className={`text-sm whitespace-nowrap transition-colors font-medium ${
+                                    isActive
+                                        ? "text-tech-accent"
+                                        : "text-foreground/70 hover:text-tech-accent"
+                                }`}
+                            >
+                                {sub.name}
                             </Link>
-                        ))}
-                    </div>
+                        )
+                    })}
                 </div>
             </div>
         </div>
