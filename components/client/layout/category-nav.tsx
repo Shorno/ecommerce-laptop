@@ -28,7 +28,7 @@ export default function CategoryNav({ categories }: CategoryNavProps) {
 
                     <div className="flex items-center gap-0.5 overflow-x-auto">
                         {categories.map((category) => (
-                            <Link key={category.name} href={`/products/${category.slug}`}>
+                            <Link key={category.name} href={`/${category.slug}`}>
                                 <Button variant="ghost" className="h-11 gap-2 text-foreground/80 hover:text-tech-accent hover:bg-tech-accent/5 transition-colors">
                                     <div className="relative h-5 w-5 rounded-full overflow-hidden flex-shrink-0">
                                         <Image

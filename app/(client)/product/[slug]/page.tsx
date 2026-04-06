@@ -88,7 +88,7 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
                 <div className="space-y-4">
                     {/* Category & Featured Badge */}
                     <div className="flex items-center gap-2 flex-wrap">
-                        <Link href={`/products/${product.category.slug}`}>
+                        <Link href={`/${product.category.slug}`}>
                             <Badge variant="secondary" className="text-xs hover:bg-secondary/80 cursor-pointer">
                                 {product.category.name}
                             </Badge>

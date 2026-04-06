@@ -23,7 +23,7 @@ export default async function CategoryGrid() {
                     {categories.map((category) => (
                         <Link
                             key={category.id}
-                            href={`/products/${category.slug}`}
+                            href={`/${category.slug}`}
                             className="group"
                         >
                             <div className="bg-card border border-border rounded-lg p-4 flex flex-col items-center gap-3 hover:border-tech-accent/40 hover:shadow-md transition-all duration-200">

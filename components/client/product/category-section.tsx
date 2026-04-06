@@ -30,7 +30,7 @@ export function CategorySection({ category }: CategorySectionProps) {
                     variant="ghost"
                     className="gap-2 text-tech-accent hover:text-tech-accent/80 hover:bg-tech-accent/5"
                 >
-                    <Link href={`/products/${category.slug}`}>
+                    <Link href={`/${category.slug}`}>
                         See All
                         <ArrowRight size={16} />
                     </Link>

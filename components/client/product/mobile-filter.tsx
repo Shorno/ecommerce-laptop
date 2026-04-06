@@ -28,6 +28,10 @@ export function MobileFilter({ categories, subCategories, currentCategorySlug }:
     const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "")
     const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "")
 
+    // Derive active subcategory from pathname (e.g. /laptops/gaming-laptop → "gaming-laptop")
+    const pathSegments = pathname.split("/").filter(Boolean)
+    const currentSubcategorySlug = currentCategorySlug && pathSegments.length >= 2 ? pathSegments[1] : null
+
     const updateFilter = (key: string, value: string | null) => {
         const params = new URLSearchParams(searchParams.toString())
 
@@ -41,20 +45,17 @@ export function MobileFilter({ categories, subCategories, currentCategorySlug }:
     }
 
     const handleCategoryChange = (categorySlug: string) => {
-        if (currentCategorySlug) {
-            router.push(`/products?category=${categorySlug}`)
-        } else {
-            updateFilter("category", categorySlug)
-        }
+        router.push(`/${categorySlug}`)
         setOpen(false)
     }
 
     const handleSubCategoryChange = (checked: boolean, subCategorySlug: string) => {
-        if (checked) {
-            updateFilter("subcategory", subCategorySlug)
-        } else {
-            updateFilter("subcategory", null)
+        if (checked && currentCategorySlug) {
+            router.push(`/${currentCategorySlug}/${subCategorySlug}`)
+        } else if (currentCategorySlug) {
+            router.push(`/${currentCategorySlug}`)
         }
+        setOpen(false)
     }
 
     const handlePriceFilter = () => {
@@ -92,15 +93,11 @@ export function MobileFilter({ categories, subCategories, currentCategorySlug }:
     }
 
     const hasActiveFilters =
-        searchParams.get("category") ||
-        searchParams.get("subcategory") ||
         searchParams.get("minPrice") ||
         searchParams.get("maxPrice") ||
         searchParams.get("inStock")
 
     const activeFilterCount = [
-        searchParams.get("category"),
-        searchParams.get("subcategory"),
         searchParams.get("minPrice"),
         searchParams.get("maxPrice"),
         searchParams.get("inStock")
@@ -176,7 +173,7 @@ export function MobileFilter({ categories, subCategories, currentCategorySlug }:
                                             <div key={subCategory.id} className="flex items-center space-x-2">
                                                 <Checkbox
                                                     id={`mobile-${subCategory.slug}`}
-                                                    checked={searchParams.get("subcategory") === subCategory.slug}
+                                                    checked={currentSubcategorySlug === subCategory.slug}
                                                     onCheckedChange={(checked) =>
                                                         handleSubCategoryChange(checked as boolean, subCategory.slug)
                                                     }
