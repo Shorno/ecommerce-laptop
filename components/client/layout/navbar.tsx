@@ -22,7 +22,7 @@ export default function Navbar({categories}: NavbarProps) {
     return (
         <nav className="bg-tech-navy text-white sticky top-0 z-50">
             <div
-                className={"flex container mx-auto max-w-7xl justify-start lg:justify-between items-center gap-2 sm:gap-4 h-14 lg:h-16 px-4 lg:px-6"}>
+                className={"flex container mx-auto max-w-[1400px] justify-start lg:justify-between items-center gap-2 sm:gap-4 h-14 lg:h-16 px-4 lg:px-6"}>
                 {/* Mobile/Tablet Menu Button */}
                 <Sheet>
                     <SheetTrigger asChild>

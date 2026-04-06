@@ -60,7 +60,7 @@ export default function CheckoutPage() {
     if (isPending) {
         return (
             <div className="min-h-screen py-8">
-                <div className="container mx-auto max-w-7xl px-4 md:px-6">
+                <div className="container mx-auto max-w-[1400px] px-4 md:px-6">
                     <div className="max-w-2xl mx-auto">
                         <Card className="border-2">
                             <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
@@ -81,7 +81,7 @@ export default function CheckoutPage() {
 
     return (
         <div className="min-h-screen py-6">
-            <div className="container mx-auto max-w-7xl px-4 md:px-6">
+            <div className="container mx-auto max-w-[1400px] px-4 md:px-6">
                 {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-sm mb-5">
                     <Link href="/" className="text-muted-foreground hover:text-tech-accent transition-colors">

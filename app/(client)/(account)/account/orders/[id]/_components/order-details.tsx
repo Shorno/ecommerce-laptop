@@ -19,7 +19,7 @@ export default  async function OrderDetailContent({orderId }: {orderId: number})
     }
 
     return (
-        <div className="container mx-auto max-w-7xl px-4 md:px-6">
+        <div className="container mx-auto max-w-[1400px] px-4 md:px-6">
             <OrderHeader order={order} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

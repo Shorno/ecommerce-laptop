@@ -47,7 +47,7 @@ export default function HeroCarousel({featuredImages}: HeroCarouselProps) {
 
     return (
         <div>
-            <div className="container mx-auto max-w-7xl px-4 md:px-6 pt-2 pb-4">
+            <div className="container mx-auto max-w-[1400px] px-4 md:px-6 pt-2 pb-4">
                 <div className="flex gap-3 lg:gap-4">
                     {/* Main Carousel — left side */}
                     <div className={`relative overflow-hidden rounded-lg ${sideBanners.length > 0 ? "w-full lg:w-[65%]" : "w-full"}`}>

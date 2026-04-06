@@ -31,7 +31,7 @@ export default function CategoryNav({ categories }: CategoryNavProps) {
 
     return (
         <div className="hidden lg:block border-b bg-card">
-            <div className="container mx-auto max-w-7xl px-4 md:px-6">
+            <div className="container mx-auto max-w-[1400px] px-4 md:px-6">
                 <div className="flex items-center gap-5 overflow-x-auto py-2.5">
                     {allSubcategories.map((sub) => {
                         const isActive = activeSubcategorySlug === sub.slug

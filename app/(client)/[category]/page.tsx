@@ -62,7 +62,7 @@ export default async function CategoryProductsPage({ params, searchParams }: Cat
     }
 
     return (
-        <div className="container mx-auto max-w-7xl px-4 md:px-6 py-6">
+        <div className="container mx-auto max-w-[1400px] px-4 md:px-6 py-6">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm mb-5">
                 <Link href="/" className="text-muted-foreground hover:text-tech-accent transition-colors">
