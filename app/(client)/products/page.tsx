@@ -4,30 +4,32 @@ import { ProductsFilter } from "@/components/client/product/products-filter"
 import { Skeleton } from "@/components/ui/skeleton"
 import type {Metadata} from "next";
 
+type SearchParams = {
+    category?: string
+    subcategory?: string
+    sort?: string
+    minPrice?: string
+    maxPrice?: string
+    inStock?: string
+    search?: string
+}
+
 interface ProductsPageProps {
-    searchParams: Promise<{
-        category?: string
-        subcategory?: string
-        sort?: string
-        minPrice?: string
-        maxPrice?: string
-        inStock?: string
-        search?: string
-    }>
+    searchParams: Promise<SearchParams>
 }
 
 export const metadata: Metadata = {
     title : "Products"
 };
 
+export const revalidate = 3600
+
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-    const params = await searchParams
-
     return (
         <div className="custom-container py-8 md:py-12">
             <div className="px-4 md:px-6">
-                {/* Header */}
+                {/* Header — static, prerendered */}
                 <div className="mb-8">
                     <h1 className="text-3xl md:text-4xl font-serif font-light mb-2">
                         Our Products
@@ -46,16 +48,22 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         </Suspense>
                     </aside>
 
-                    {/* Products Grid */}
+                    {/* Products Grid — streams in based on search params */}
                     <main className="flex-1">
                         <Suspense fallback={<ProductsGridSkeleton />}>
-                            <ProductsGrid searchParams={params} />
+                            <AllProducts searchParams={searchParams} />
                         </Suspense>
                     </main>
                 </div>
             </div>
         </div>
     )
+}
+
+/** Wrapper that awaits searchParams inside Suspense — keeps the page shell static */
+async function AllProducts({ searchParams }: { searchParams: Promise<SearchParams> }) {
+    const params = await searchParams
+    return <ProductsGrid searchParams={params} />
 }
 
 function FilterSkeleton() {

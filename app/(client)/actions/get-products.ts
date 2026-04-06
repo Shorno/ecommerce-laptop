@@ -1,4 +1,4 @@
-"use server"
+
 
 import {db} from "@/db/config"
 import {product} from "@/db/schema"

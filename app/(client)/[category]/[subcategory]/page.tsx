@@ -13,15 +13,17 @@ import { ChevronRight } from "lucide-react"
 
 export const revalidate = 3600
 
+type SearchParams = {
+    sort?: string
+    minPrice?: string
+    maxPrice?: string
+    inStock?: string
+    search?: string
+}
+
 interface SubcategoryProductsPageProps {
     params: Promise<{ category: string; subcategory: string }>
-    searchParams: Promise<{
-        sort?: string
-        minPrice?: string
-        maxPrice?: string
-        inStock?: string
-        search?: string
-    }>
+    searchParams: Promise<SearchParams>
 }
 
 export async function generateMetadata({ params }: SubcategoryProductsPageProps): Promise<Metadata> {
@@ -31,9 +33,7 @@ export async function generateMetadata({ params }: SubcategoryProductsPageProps)
     const subCategory = await getSubCategoryBySlug(subcategorySlug, categorySlug)
 
     if (!category || !subCategory) {
-        return {
-            title: 'Not Found'
-        }
+        return { title: 'Not Found' }
     }
 
     const title = `${subCategory.name} - ${category.name}`
@@ -68,7 +68,6 @@ export async function generateStaticParams() {
 
 export default async function SubcategoryProductsPage({ params, searchParams }: SubcategoryProductsPageProps) {
     const { category: categorySlug, subcategory: subcategorySlug } = await params
-    const filters = await searchParams
 
     const category = await getCategoryBySlug(categorySlug)
     if (!category) {
@@ -83,7 +82,7 @@ export default async function SubcategoryProductsPage({ params, searchParams }: 
     return (
         <div className="custom-container py-8 md:py-12">
             <div className="px-4 md:px-6">
-                {/* Breadcrumb */}
+                {/* Breadcrumb — static, prerendered */}
                 <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
                     <Link href={`/${categorySlug}`} className="hover:text-foreground transition-colors">
                         {category.name}
@@ -92,7 +91,7 @@ export default async function SubcategoryProductsPage({ params, searchParams }: 
                     <span className="text-foreground font-medium">{subCategory.name}</span>
                 </nav>
 
-                {/* Header */}
+                {/* Header — static, prerendered */}
                 <div className="mb-8">
                     <h1 className="text-3xl md:text-4xl font-serif font-light mb-2">
                         {subCategory.name}
@@ -111,17 +110,37 @@ export default async function SubcategoryProductsPage({ params, searchParams }: 
                         </Suspense>
                     </aside>
 
-                    {/* Products Grid */}
+                    {/* Products Grid — streams in based on search params */}
                     <main className="flex-1">
                         <Suspense fallback={<ProductsGridSkeleton />}>
-                            <ProductsGrid
-                                searchParams={{ ...filters, category: categorySlug, subcategory: subcategorySlug }}
+                            <SubcategoryProducts
+                                categorySlug={categorySlug}
+                                subcategorySlug={subcategorySlug}
+                                searchParams={searchParams}
                             />
                         </Suspense>
                     </main>
                 </div>
             </div>
         </div>
+    )
+}
+
+/** Wrapper that awaits searchParams inside Suspense — keeps the page shell static */
+async function SubcategoryProducts({
+    categorySlug,
+    subcategorySlug,
+    searchParams,
+}: {
+    categorySlug: string
+    subcategorySlug: string
+    searchParams: Promise<SearchParams>
+}) {
+    const filters = await searchParams
+    return (
+        <ProductsGrid
+            searchParams={{ ...filters, category: categorySlug, subcategory: subcategorySlug }}
+        />
     )
 }
 

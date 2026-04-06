@@ -4,6 +4,8 @@ import getCategoryWithSubcategory from "@/app/(client)/actions/get-category-with
 import CartSync from "@/components/client/cart/cart-sync";
 import {Footer} from "@/components/client/layout/footer";
 
+export const revalidate = 3600
+
 export default async function ClientLayout({
                                                children,
                                            }: Readonly<{

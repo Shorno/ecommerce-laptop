@@ -10,39 +10,32 @@ import { Metadata } from "next"
 
 export const revalidate = 3600
 
-interface CategoryProductsPageProps {
-    params: Promise<{ category: string }>
-    searchParams: Promise<{
-        sort?: string
-        minPrice?: string
-        maxPrice?: string
-        inStock?: string
-        search?: string
-    }>
+type SearchParams = {
+    sort?: string
+    minPrice?: string
+    maxPrice?: string
+    inStock?: string
+    search?: string
 }
 
-export async function generateMetadata({ params, searchParams }: CategoryProductsPageProps): Promise<Metadata> {
-    const { category: categorySlug } = await params
-    const filters = await searchParams
+interface CategoryProductsPageProps {
+    params: Promise<{ category: string }>
+    searchParams: Promise<SearchParams>
+}
 
+export async function generateMetadata({ params }: CategoryProductsPageProps): Promise<Metadata> {
+    const { category: categorySlug } = await params
     const category = await getCategoryBySlug(categorySlug)
 
     if (!category) {
-        return {
-            title: 'Category Not Found'
-        }
-    }
-
-    let title = category.name
-    if (filters.search) {
-        title += ` - Search: ${filters.search}`
+        return { title: 'Category Not Found' }
     }
 
     return {
-        title: title,
+        title: category.name,
         description: `Explore our ${category.name.toLowerCase()} collection. Find the best products in this category.`,
         openGraph: {
-            title: title,
+            title: category.name,
             description: `Explore our ${category.name.toLowerCase()} collection`,
         },
     }
@@ -59,7 +52,6 @@ export async function generateStaticParams() {
 
 export default async function CategoryProductsPage({ params, searchParams }: CategoryProductsPageProps) {
     const { category: categorySlug } = await params
-    const filters = await searchParams
 
     const category = await getCategoryBySlug(categorySlug)
 
@@ -70,7 +62,7 @@ export default async function CategoryProductsPage({ params, searchParams }: Cat
     return (
         <div className="custom-container py-8 md:py-12">
             <div className="px-4 md:px-6">
-                {/* Header */}
+                {/* Header — static, prerendered */}
                 <div className="mb-8">
                     <h1 className="text-3xl md:text-4xl font-serif font-light mb-2">
                         {category.name}
@@ -89,18 +81,22 @@ export default async function CategoryProductsPage({ params, searchParams }: Cat
                         </Suspense>
                     </aside>
 
-                    {/* Products Grid */}
+                    {/* Products Grid — streams in based on search params */}
                     <main className="flex-1">
                         <Suspense fallback={<ProductsGridSkeleton />}>
-                            <ProductsGrid
-                                searchParams={{ ...filters, category: categorySlug }}
-                            />
+                            <CategoryProducts categorySlug={categorySlug} searchParams={searchParams} />
                         </Suspense>
                     </main>
                 </div>
             </div>
         </div>
     )
+}
+
+/** Wrapper that awaits searchParams inside Suspense — keeps the page shell static */
+async function CategoryProducts({ categorySlug, searchParams }: { categorySlug: string; searchParams: Promise<SearchParams> }) {
+    const filters = await searchParams
+    return <ProductsGrid searchParams={{ ...filters, category: categorySlug }} />
 }
 
 function FilterSkeleton() {

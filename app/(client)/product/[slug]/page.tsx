@@ -10,11 +10,20 @@ import getProductBySlug from "@/app/actions/products/get-product-by-slug"
 import { ProductImageGallery } from "@/components/client/product/product-image-gallery"
 import { ProductDetailsActions } from "@/components/client/product/product-details-actions"
 import type {Metadata} from "next";
+import { db } from "@/db/config"
+
+export const revalidate = 3600
 
 interface ProductDetailsPageProps {
     params: Promise<{ slug: string }>
 }
 
+export async function generateStaticParams() {
+    const products = await db.query.product.findMany({
+        columns: { slug: true },
+    })
+    return products.map((p) => ({ slug: p.slug }))
+}
 
 export async function generateMetadata({ params }: ProductDetailsPageProps): Promise<Metadata> {
     const { slug } = await params

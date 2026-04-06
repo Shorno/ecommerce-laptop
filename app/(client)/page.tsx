@@ -11,6 +11,8 @@ export const metadata: Metadata = {
     description: "Discover the latest laptops, electronics, and tech accessories. Shop premium brands at the best prices at LaptopBD.",
 };
 
+export const revalidate = 3600
+
 function SectionSkeleton() {
     return (
         <div className="custom-container py-8">
