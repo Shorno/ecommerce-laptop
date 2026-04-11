@@ -90,7 +90,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row gap-3">
                             <Button asChild size="lg" className="gap-2 bg-tech-accent hover:bg-tech-accent/90 text-white rounded-full px-8">
-                                <Link href={`/orders/${order.id}`}>
+                                <Link href={`/account/orders/${order.id}`}>
                                     Track Your Order
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>

@@ -35,6 +35,7 @@ export default function ShippingForm({ onValidSubmit }: ShippingFormProps) {
     const [paymentType, setPaymentType] = React.useState<"online" | "cod">("online")
     const [selectedCity, setSelectedCity] = React.useState<string>("")
     const [availableAreas, setAvailableAreas] = React.useState<readonly string[]>([])
+    const [isLoadingAddress, setIsLoadingAddress] = React.useState(false)
     const user = session?.data?.user
 
     const form = useForm({
@@ -58,6 +59,48 @@ export default function ShippingForm({ onValidSubmit }: ShippingFormProps) {
             })
         },
     })
+
+    // Pre-fill saved address on mount
+    React.useEffect(() => {
+        if (!user) return
+
+        async function loadSavedAddress() {
+            setIsLoadingAddress(true)
+            try {
+                const { getCustomerInfo } = await import("@/app/(client)/(account)/actions/customer-info")
+                const address = await getCustomerInfo()
+
+                if (address) {
+                    form.setFieldValue("fullName", address.fullName || user?.name || "")
+                    form.setFieldValue("phone", address.phone || "")
+                    form.setFieldValue("email", user?.email || "")
+                    form.setFieldValue("addressLine", address.addressLine || "")
+                    form.setFieldValue("postalCode", address.postalCode || "")
+                    form.setFieldValue("country", address.country || "BD")
+
+                    // Set city and populate areas
+                    if (address.city) {
+                        setSelectedCity(address.city)
+                        const areas = CITIES_WITH_AREAS[address.city as keyof typeof CITIES_WITH_AREAS] || []
+                        setAvailableAreas(areas)
+                        form.setFieldValue("city", address.city)
+
+                        // Set area if it exists in the available areas
+                        if (address.area && areas.includes(address.area)) {
+                            form.setFieldValue("area", address.area)
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading saved address:", error)
+            } finally {
+                setIsLoadingAddress(false)
+            }
+        }
+
+        loadSavedAddress()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.email])
 
     // Update available areas when city changes
     const handleCityChange = (city: string) => {
