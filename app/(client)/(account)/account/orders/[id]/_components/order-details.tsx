@@ -5,6 +5,8 @@ import OrderItemsSection from "@/app/(client)/(account)/account/orders/[id]/_com
 import OrderSummarySection from "@/app/(client)/(account)/account/orders/[id]/_components/order-summery-section";
 import CustomerInfoSection from "@/app/(client)/(account)/account/orders/[id]/_components/customer-info-section";
 import ShippingSection from "@/app/(client)/(account)/account/orders/[id]/_components/shipping-section";
+import PaymentSection from "@/app/(client)/(account)/account/orders/[id]/_components/payment-section";
+import OrderTimeline from "@/app/(client)/(account)/account/orders/[id]/_components/order-timeline";
 import {getOrderById} from "@/app/actions/order";
 import {notFound} from "next/navigation";
 
@@ -19,7 +21,7 @@ export default  async function OrderDetailContent({orderId }: {orderId: number})
     }
 
     return (
-        <div className="container mx-auto">
+        <div className="container mx-auto max-w-[1400px] px-4 md:px-6">
             <OrderHeader order={order} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -31,7 +33,9 @@ export default  async function OrderDetailContent({orderId }: {orderId: number})
 
                 {/* Right Column */}
                 <div className="space-y-4 sm:space-y-6">
+                    <OrderTimeline order={order} />
                     <OrderSummarySection order={order} />
+                    <PaymentSection payment={order.payment} />
                     <CustomerInfoSection order={order} />
                     <ShippingSection order={order} />
                 </div>
@@ -39,3 +43,4 @@ export default  async function OrderDetailContent({orderId }: {orderId: number})
         </div>
     )
 }
+

@@ -1,6 +1,7 @@
 import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar";
 import {AppSidebar} from "@/components/dashboard/app-sidebar";
 import {SiteHeader} from "@/components/dashboard/site-header";
+import {TooltipProvider} from "@/components/ui/tooltip";
 import {unauthorized} from "next/navigation";
 import {NextIntlClientProvider} from "next-intl";
 import {getMessages} from "next-intl/server";
@@ -16,6 +17,7 @@ export default async function AdminDashboardLayout({children}: { children: React
     }
 
     return (
+        <TooltipProvider>
         <SidebarProvider
             style={
                 {
@@ -38,5 +40,6 @@ export default async function AdminDashboardLayout({children}: { children: React
                 </div>
             </SidebarInset>
         </SidebarProvider>
+        </TooltipProvider>
     )
 }

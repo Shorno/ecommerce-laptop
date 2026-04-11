@@ -150,7 +150,7 @@ export default function NewCategoryDialog() {
                                             autoGenerateSlugFromName(e.target.value)
                                         }}
                                         aria-invalid={isInvalid}
-                                        placeholder="Electronics"
+                                        placeholder="Laptops"
                                         autoComplete="off"
                                     />
                                     {isInvalid && (
@@ -176,7 +176,7 @@ export default function NewCategoryDialog() {
                                         onBlur={field.handleBlur}
                                         onChange={(e) => field.handleChange(e.target.value)}
                                         aria-invalid={isInvalid}
-                                        placeholder="electronics"
+                                        placeholder="laptops"
                                         autoComplete="off"
                                     />
                                     <FieldDescription>

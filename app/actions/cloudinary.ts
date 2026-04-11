@@ -4,7 +4,7 @@ import { v2 as cloudinary , UploadApiResponse} from 'cloudinary'
 
 cloudinary.config({
     cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!,
-    api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY!,
+    api_key: process.env.CLOUDINARY_API_KEY!,
     api_secret: process.env.CLOUDINARY_API_SECRET!,
 })
 
@@ -24,7 +24,9 @@ export async function uploadImageToCloudinary(
 ): Promise<UploadResult | UploadError> {
     try {
         const file = formData.get('file') as File
-        const folder = (formData.get('folder') as string) || 'uploads'
+        const subFolder = (formData.get('folder') as string) || 'uploads'
+        const baseFolder = process.env.CLOUDINARY_BASE_FOLDER
+        const folder = baseFolder ? `${baseFolder}/${subFolder}` : subFolder
 
         if (!file) {
             return { success: false, error: 'No file provided' }

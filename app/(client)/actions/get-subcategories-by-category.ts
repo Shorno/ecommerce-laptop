@@ -1,4 +1,4 @@
-"use server"
+
 
 import { db } from "@/db/config"
 import { subCategory } from "@/db/schema"

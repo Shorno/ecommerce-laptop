@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ShoppingCart, Zap, Plus, Minus } from "lucide-react"
+import { ShoppingCart, ShoppingBag, Plus, Minus } from "lucide-react"
 import { ProductWithRelations } from "@/db/schema"
 import { toast } from "sonner"
 import { useCartActions, useCartItems } from "@/stote/cart-sotre"
@@ -133,7 +133,7 @@ export function ProductDetailsActions({ product }: ProductDetailsActionsProps) {
                     size="default"
                     className="flex-1 min-w-[140px]"
                 >
-                    <Zap className="mr-2 h-4 w-4" />
+                    <ShoppingBag className="mr-2 h-4 w-4" />
                     Buy Now
                 </Button>
             </div>

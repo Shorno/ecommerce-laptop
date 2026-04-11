@@ -1,6 +1,6 @@
 {
-  "id": "2d1ca75a-1c00-4201-b3d3-7e8d985c3bd3",
-  "prevId": "95fe4eab-19a5-436b-ab0a-3f2fb3b5de77",
+  "id": "af224e5c-5c80-4340-932a-e2a2c1f68efa",
+  "prevId": "d1b32f53-556a-4bd9-9aad-03c749482dad",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -749,6 +749,13 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
+        },
+        "placement": {
+          "name": "placement",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'carousel'"
         },
         "createdAt": {
           "name": "createdAt",

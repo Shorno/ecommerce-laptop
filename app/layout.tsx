@@ -1,8 +1,10 @@
 import type {Metadata} from "next";
-import {Poppins} from "next/font/google";
+import {Poppins, Geist } from "next/font/google";
 import "./globals.css";
 import Providers from "@/app/providers";
+import { cn } from "@/lib/utils";
 
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const poppins = Poppins({
     variable: "--font-poppins",
@@ -12,39 +14,30 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
     title: {
-        template: '%s | KhaatiBazar Shop',
-        default: 'KhaatiBazar Shop',
+        template: '%s | LaptopBD',
+        default: 'LaptopBD - Your Trusted Tech Partner',
     },
-    description: "Organic products shop.",
-    keywords: ['organic products', 'natural foods', 'healthy living', 'organic shop'],
-    authors: [{ name: 'KhaatiBazar' }],
+    description: "Shop the latest laptops, electronics, and tech accessories at the best prices in Bangladesh.",
+    keywords: ['laptops', 'electronics', 'tech accessories', 'laptop shop Bangladesh', 'buy laptop online'],
+    authors: [{ name: 'LaptopBD' }],
     openGraph: {
-        title: 'KhaatiBazar',
-        description: 'Organic products shop.',
-        url: 'https://www.khaatibazar.shop/',
-        siteName: 'KhaatiBazar',
-        images: [
-            {
-                url: 'https://res.cloudinary.com/def3zwztt/image/upload/v1762872083/featured-images/ypknsea7usqqcxhvn6nq.jpg',
-                width: 1200,
-                height: 630,
-                alt: 'KhaatiBazar - Organic products shop',
-            },
-        ],
-        locale: 'bn_BD',
+        title: 'LaptopBD',
+        description: 'Shop the latest laptops, electronics, and tech accessories at the best prices in Bangladesh.',
+        url: 'http://localhost:3000/',
+        siteName: 'LaptopBD',
+        locale: 'en_US',
         type: 'website',
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'KhaatiBazar',
-        description: 'Organic products shop.',
-        images: ['https://res.cloudinary.com/def3zwztt/image/upload/v1762872083/featured-images/ypknsea7usqqcxhvn6nq.jpg'],
+        title: 'LaptopBD',
+        description: 'Shop the latest laptops, electronics, and tech accessories at the best prices in Bangladesh.',
     },
     robots: {
         index: true,
         follow: true,
     },
-    metadataBase: new URL('https://www.khaatibazar.shop/'),
+    metadataBase: new URL('http://localhost:3000/'),
 }
 
 
@@ -54,7 +47,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
         <body
             className={`${poppins.className} antialiased`}
         >

@@ -12,6 +12,17 @@ export interface OrderItem {
     subtotal: string
 }
 
+export interface OrderPaymentData {
+    id: number
+    paymentMethod: string
+    paymentProvider: string | null
+    status: string
+    amount: string
+    transactionId: string | null
+    senderNumber: string | null
+    completedAt: Date | null
+}
+
 export interface OrderData {
     id: number
     orderNumber: string
@@ -29,6 +40,7 @@ export interface OrderData {
     shippingCountry: string
     createdAt: Date
     items: OrderItem[]
+    payment: OrderPaymentData | null
 }
 
 export const statusColors = {

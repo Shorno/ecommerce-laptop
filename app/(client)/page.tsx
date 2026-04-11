@@ -1,29 +1,59 @@
 import FeaturedImages from "@/components/home/featured-images";
 import CategoryListing from "@/components/client/product/category-listing";
+import CategoryGrid from "@/components/home/category-grid";
+import FeaturedProducts from "@/components/home/featured-products";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
     title: "Home",
-    description: "Discover our carefully curated selection of pure honey and premium nuts, sourced from the finest producers. Shop premium natural organic products at KhaatiBazar.",
+    description: "Discover the latest laptops, electronics, and tech accessories. Shop premium brands at the best prices at LaptopBD.",
 };
+
+export const revalidate = 3600
+
+function SectionSkeleton() {
+    return (
+        <div className="custom-container py-8">
+            <Skeleton className="h-8 w-48 mb-6" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-72 w-full rounded-lg" />
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export default function HomePage() {
     return (
-        <>
-            <FeaturedImages/>
-            <div className="custom-container">
-                <div className="px-6 py-16 md:px-12 md:py-24">
-                    <div className="mx-auto text-center">
-                        <h1 className="text-4xl md:text-5xl font-serif font-light mb-4 text-balance">
-                            Premium Natural Products
-                        </h1>
-                        <p className="text-lg max-w-2xl mx-auto text-balance">
-                            Discover our carefully curated selection of pure honey and premium nuts, sourced from the finest producers
-                        </p>
+        <div className="bg-tech-bg dark:bg-background min-h-screen">
+            {/* Hero Carousel */}
+            <FeaturedImages />
+
+            {/* Category Grid */}
+            <Suspense fallback={
+                <div className="custom-container py-8">
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <Skeleton key={i} className="h-32 w-full rounded-lg" />
+                        ))}
                     </div>
                 </div>
-                <CategoryListing/>
-            </div>
-        </>
+            }>
+                <CategoryGrid />
+            </Suspense>
+
+            {/* Featured Products */}
+            <Suspense fallback={<SectionSkeleton />}>
+                <FeaturedProducts />
+            </Suspense>
+
+            {/* Category-wise Product Listings */}
+            <Suspense fallback={<SectionSkeleton />}>
+                <CategoryListing />
+            </Suspense>
+        </div>
     )
 }

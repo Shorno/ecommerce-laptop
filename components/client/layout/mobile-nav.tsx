@@ -29,7 +29,7 @@ export default function MobileNav({ categories }: MobileNavProps) {
                     {categories.map((category) => (
                         <Link
                             key={category.name}
-                            href={`/products/${category.slug}`}
+                            href={`/${category.slug}`}
                             className="flex items-center gap-3 py-3 px-2 rounded-md hover:bg-accent transition-colors"
                         >
                             <div className="relative h-8 w-8 rounded-full overflow-hidden flex-shrink-0">

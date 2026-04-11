@@ -8,6 +8,7 @@ export const featuredImages = pgTable("featured_images", {
     subtitle: varchar("subtitle", {length: 100}).notNull(),
     cta: varchar("cta", {length: 50}).notNull(),
     ctaLink: varchar("cta_link", {length: 255}).notNull(),
+    placement: varchar("placement", {length: 20}).notNull().default("carousel"),
     ...timestamps
 });
 

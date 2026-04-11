@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 
 export default function OrderDetailLoading() {
     return (
-        <div className="container mx-auto">
+        <div className="container mx-auto max-w-[1400px] px-4 md:px-6">
             {/* Header Skeleton */}
             <div className="mb-6 sm:mb-8">
                 <Button variant="ghost" size="sm" disabled className="mb-3 sm:mb-4">

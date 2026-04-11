@@ -1,0 +1,1 @@
+ALTER TABLE "featured_images" ADD COLUMN "placement" varchar(20) DEFAULT 'carousel' NOT NULL;

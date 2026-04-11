@@ -171,6 +171,7 @@ export async function getOrderById(orderId: number) {
             ),
             with: {
                 items: true,
+                payment: true,
             },
         })
 

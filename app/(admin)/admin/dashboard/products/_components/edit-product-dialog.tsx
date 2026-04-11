@@ -208,7 +208,7 @@ export default function EditProductDialog({product}: EditProductDialogProps) {
                                             autoGenerateSlugFromName(e.target.value)
                                         }}
                                         aria-invalid={isInvalid}
-                                        placeholder="Organic Tomatoes"
+                                        placeholder="Dell Inspiron 15"
                                         autoComplete="off"
                                     />
                                     {isInvalid && (
@@ -234,7 +234,7 @@ export default function EditProductDialog({product}: EditProductDialogProps) {
                                         onBlur={field.handleBlur}
                                         onChange={(e) => field.handleChange(e.target.value)}
                                         aria-invalid={isInvalid}
-                                        placeholder="organic-tomatoes"
+                                        placeholder="dell-inspiron-15"
                                         autoComplete="off"
                                     />
                                     <FieldDescription>

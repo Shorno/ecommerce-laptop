@@ -46,8 +46,8 @@ export default function SearchModal({open, onOpenChange}: SearchModalProps) {
         staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     });
 
-    const handleProductClick = (categorySlug: string, productSlug: string) => {
-        router.push(`/products/${categorySlug}/${productSlug}`);
+    const handleProductClick = (productSlug: string) => {
+        router.push(`/product/${productSlug}`);
         onOpenChange(false);
         setQuery("");
     };
@@ -97,7 +97,7 @@ export default function SearchModal({open, onOpenChange}: SearchModalProps) {
                             {results.map((product) => (
                                 <button
                                     key={product.id}
-                                    onClick={() => handleProductClick(product.category.slug, product.slug)}
+                                    onClick={() => handleProductClick(product.slug)}
                                     className="w-full flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors text-left"
                                 >
                                     <div

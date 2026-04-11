@@ -72,9 +72,9 @@ export function SignupForm() {
                     >
                         <FieldGroup>
                             <div className="flex flex-col items-center gap-2 text-center">
-                                <h1 className="text-2xl font-bold">Welcome to KhatiBazar</h1>
+                                <h1 className="text-2xl font-bold">Welcome to LaptopBD</h1>
                                 <p className="text-muted-foreground text-balance">
-                                    Create your KhaatiBazar account
+                                    Create your LaptopBD account
                                 </p>
                             </div>
                             <form.Field name="name">

@@ -10,16 +10,25 @@ import getProductBySlug from "@/app/actions/products/get-product-by-slug"
 import { ProductImageGallery } from "@/components/client/product/product-image-gallery"
 import { ProductDetailsActions } from "@/components/client/product/product-details-actions"
 import type {Metadata} from "next";
+import { db } from "@/db/config"
+
+export const revalidate = 3600
 
 interface ProductDetailsPageProps {
-    params: Promise<{ category: string; productSlug: string }>
+    params: Promise<{ slug: string }>
 }
 
+export async function generateStaticParams() {
+    const products = await db.query.product.findMany({
+        columns: { slug: true },
+    })
+    return products.map((p) => ({ slug: p.slug }))
+}
 
 export async function generateMetadata({ params }: ProductDetailsPageProps): Promise<Metadata> {
-    const { productSlug } = await params
+    const { slug } = await params
 
-    const product = await getProductBySlug(productSlug)
+    const product = await getProductBySlug(slug)
 
     if (!product) {
         return {
@@ -35,7 +44,7 @@ export async function generateMetadata({ params }: ProductDetailsPageProps): Pro
             description: `${product.name} - ${product.category.name}. Price: ${formatPrice(product.price)}`,
             images: [
                 {
-                    url: product.name,
+                    url: product.image,
                     width: 1200,
                     height: 630,
                     alt: product.name,
@@ -53,18 +62,17 @@ export async function generateMetadata({ params }: ProductDetailsPageProps): Pro
 }
 
 
-
 export default async function ProductDetailsPage({ params }: ProductDetailsPageProps) {
-    const {productSlug } = await params
+    const { slug } = await params
 
-    const product = await getProductBySlug(productSlug)
+    const product = await getProductBySlug(slug)
 
     if (!product) {
         notFound()
     }
 
     return (
-        <div className="container mx-auto px-4 py-4 md:py-6">
+        <div className="container mx-auto max-w-[1400px] px-4 md:px-6 py-4 md:py-6">
             {/* Back Button */}
             <div className="mb-4">
                 <Link href="/products">
@@ -89,11 +97,13 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
                 <div className="space-y-4">
                     {/* Category & Featured Badge */}
                     <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="secondary" className="text-xs">
-                            {product.category.name}
-                        </Badge>
+                        <Link href={`/${product.category.slug}`}>
+                            <Badge variant="secondary" className="text-xs hover:bg-secondary/80 cursor-pointer">
+                                {product.category.name}
+                            </Badge>
+                        </Link>
                         {product.isFeatured && (
-                            <Badge className="text-xs">Featured</Badge>
+                            <Badge className="text-xs bg-tech-accent text-white border-0">Featured</Badge>
                         )}
                         {product.inStock ? (
                             <Badge variant="outline" className="text-xs text-green-600 border-green-600">
@@ -122,7 +132,7 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
 
                     {/* Price */}
                     <div>
-                        <p className="text-2xl md:text-3xl font-bold text-primary">
+                        <p className="text-2xl md:text-3xl font-bold text-tech-accent">
                             {formatPrice(product.price)}
                         </p>
                     </div>
@@ -146,13 +156,6 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
 
                     {/* Action Buttons */}
                     <ProductDetailsActions product={product} />
-
-                    {/* Additional Info */}
-                    {/*{product.stockQuantity <= 5 && product.stockQuantity > 0 && (*/}
-                    {/*    <p className="text-xs text-amber-600">*/}
-                    {/*        ⚠️ Only {product.stockQuantity} left in stock!*/}
-                    {/*    </p>*/}
-                    {/*)}*/}
                 </div>
             </div>
         </div>

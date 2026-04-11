@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { OrderData, statusColors, OrderStatus } from "@/lib/types/order"
+import CancelOrderButton from "@/app/(client)/(account)/account/orders/[id]/_components/cancel-order-button"
 
 interface OrderHeaderProps {
     order: OrderData
@@ -26,12 +27,15 @@ export default function OrderHeader({ order }: OrderHeaderProps) {
                         Order #{order.orderNumber}
                     </p>
                 </div>
-                <Badge
-                    variant="outline"
-                    className={`${statusColors[order.status as OrderStatus] || "bg-gray-100 text-gray-800"} text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2 self-start sm:self-auto`}
-                >
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                </Badge>
+                <div className="flex items-center gap-3 self-start sm:self-auto">
+                    <Badge
+                        variant="outline"
+                        className={`${statusColors[order.status as OrderStatus] || "bg-gray-100 text-gray-800"} text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2`}
+                    >
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </Badge>
+                    <CancelOrderButton orderId={order.id} orderStatus={order.status} />
+                </div>
             </div>
         </div>
     )
