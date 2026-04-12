@@ -1,5 +1,4 @@
 import { CreditCard, Banknote, CheckCircle, Clock, XCircle } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { OrderPaymentData } from "@/lib/types/order"
 
@@ -46,39 +45,37 @@ export default function PaymentSection({ payment }: PaymentSectionProps) {
     const StatusIcon = statusInfo.icon
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 border-b border-border bg-muted/30">
+                <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
                     {isCod ? (
-                        <Banknote className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <Banknote className="h-4 w-4 text-muted-foreground" />
                     ) : (
-                        <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <CreditCard className="h-4 w-4 text-muted-foreground" />
                     )}
-                    Payment Method
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                        <p className="font-medium text-sm sm:text-base">
-                            {getPaymentMethodLabel(payment?.paymentMethod || "cod")}
-                        </p>
-                        <Badge variant={statusInfo.variant} className="gap-1">
-                            <StatusIcon className="h-3 w-3" />
-                            {statusInfo.label}
-                        </Badge>
-                    </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                        {getPaymentMethodDescription(payment?.paymentMethod || "cod")}
+                    Payment
+                </h2>
+            </div>
+            <div className="p-4 sm:px-6 sm:py-5 space-y-3">
+                <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-foreground">
+                        {getPaymentMethodLabel(payment?.paymentMethod || "cod")}
                     </p>
-                    {payment?.transactionId && (
-                        <div className="text-xs text-muted-foreground pt-1 border-t">
-                            <span className="font-medium">Transaction ID:</span>{" "}
-                            <span className="font-mono">{payment.transactionId}</span>
-                        </div>
-                    )}
+                    <Badge variant={statusInfo.variant} className="gap-1 text-xs">
+                        <StatusIcon className="h-3 w-3" />
+                        {statusInfo.label}
+                    </Badge>
                 </div>
-            </CardContent>
-        </Card>
+                <p className="text-xs text-muted-foreground">
+                    {getPaymentMethodDescription(payment?.paymentMethod || "cod")}
+                </p>
+                {payment?.transactionId && (
+                    <div className="text-xs text-muted-foreground pt-2 border-t border-border">
+                        <span className="font-medium">Transaction ID:</span>{" "}
+                        <span className="font-mono">{payment.transactionId}</span>
+                    </div>
+                )}
+            </div>
+        </div>
     )
 }

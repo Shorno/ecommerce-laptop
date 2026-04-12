@@ -6,6 +6,8 @@ import {customerAddress} from "@/db/schema";
 import {addressSchema} from "@/lib/schemas/address.scheam";
 import {revalidatePath} from "next/cache";
 import {checkAuth} from "@/app/actions/auth/checkAuth";
+import {auth} from "@/lib/auth";
+import {headers} from "next/headers";
 
 export async function updateCustomerInfo(data: unknown) {
     const session = await checkAuth()
@@ -60,6 +62,14 @@ export async function updateCustomerInfo(data: unknown) {
                 country: validatedData.country,
             });
         }
+
+        // Sync the user's name to Better Auth's user table
+        await auth.api.updateUser({
+            body: {
+                name: validatedData.fullName,
+            },
+            headers: await headers(),
+        })
 
         revalidatePath('/account/profile')
 

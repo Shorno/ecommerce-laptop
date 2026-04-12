@@ -1,36 +1,48 @@
-import { ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
 import { OrderData, statusColors, OrderStatus } from "@/lib/types/order"
 import CancelOrderButton from "@/app/(client)/(account)/account/orders/[id]/_components/cancel-order-button"
+import { Calendar, Hash, Package } from "lucide-react"
 
 interface OrderHeaderProps {
     order: OrderData
 }
 
 export default function OrderHeader({ order }: OrderHeaderProps) {
-    return (
-        <div className="mb-6 sm:mb-8">
-            <Button variant="ghost" size="sm" asChild className="mb-3 sm:mb-4">
-                <Link href="/account/orders">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">Back to Orders</span>
-                    <span className="sm:hidden">Back</span>
-                </Link>
-            </Button>
+    const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0)
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+    return (
+        <div>
+            {/* Title row */}
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Order Details</h1>
-                    <p className="text-sm sm:text-base text-muted-foreground">
+                    <h1 className="text-2xl font-bold text-foreground">
                         Order #{order.orderNumber}
-                    </p>
+                    </h1>
+                    {/* Meta pills */}
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 text-sm text-muted-foreground">
+                        <span className="inline-flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5" />
+                            {new Date(order.createdAt).toLocaleDateString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                            })}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                            <Package className="h-3.5 w-3.5" />
+                            {itemCount} {itemCount === 1 ? "item" : "items"}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                            <Hash className="h-3.5 w-3.5" />
+                            {order.orderNumber}
+                        </span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3 self-start sm:self-auto">
+
+                <div className="flex items-center gap-2 shrink-0">
                     <Badge
                         variant="outline"
-                        className={`${statusColors[order.status as OrderStatus] || "bg-gray-100 text-gray-800"} text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2`}
+                        className={`${statusColors[order.status as OrderStatus] || "bg-gray-100 text-gray-800"} text-sm px-3 py-1`}
                     >
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </Badge>

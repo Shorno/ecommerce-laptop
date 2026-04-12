@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { formatPrice } from "@/utils/currency"
 import { OrderData } from "@/lib/types/order"
@@ -9,33 +8,31 @@ interface OrderSummarySectionProps {
 
 export default function OrderSummarySection({ order }: OrderSummarySectionProps) {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="space-y-3">
-                    <div className="flex justify-between text-sm sm:text-base">
-                        <span className="text-muted-foreground">Subtotal</span>
-                        <span className="font-medium">{formatPrice(parseFloat(order.subtotal))}</span>
-                    </div>
-                    <div className="flex justify-between text-sm sm:text-base">
-                        <span className="text-muted-foreground">Shipping</span>
-                        <span className="font-medium">
-                            {parseFloat(order.shippingAmount) === 0
-                                ? "FREE"
-                                : formatPrice(parseFloat(order.shippingAmount))}
-                        </span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between items-center">
-                        <span className="font-semibold text-base sm:text-lg">Total</span>
-                        <span className="text-lg sm:text-xl font-bold text-primary">
-                            {formatPrice(parseFloat(order.totalAmount))}
-                        </span>
-                    </div>
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 border-b border-border bg-muted/30">
+                <h2 className="text-sm font-semibold text-foreground">Order Summary</h2>
+            </div>
+            <div className="p-4 sm:px-6 sm:py-5 space-y-3">
+                <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-medium text-foreground">{formatPrice(parseFloat(order.subtotal))}</span>
                 </div>
-            </CardContent>
-        </Card>
+                <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="font-medium text-foreground">
+                        {parseFloat(order.shippingAmount) === 0
+                            ? "FREE"
+                            : formatPrice(parseFloat(order.shippingAmount))}
+                    </span>
+                </div>
+                <Separator />
+                <div className="flex justify-between items-center">
+                    <span className="font-semibold text-foreground">Total</span>
+                    <span className="text-lg font-bold text-primary">
+                        {formatPrice(parseFloat(order.totalAmount))}
+                    </span>
+                </div>
+            </div>
+        </div>
     )
 }

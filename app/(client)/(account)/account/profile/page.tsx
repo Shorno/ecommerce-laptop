@@ -10,8 +10,13 @@ export const metadata: Metadata = {
 
 export default  function  ProfilePage() {
     return (
-        <div>
-            <h2 className="text-2xl font-semibold mb-6">Profile Information</h2>
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-2xl font-bold text-foreground">Personal Info</h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                    Manage your name, phone number, and shipping address.
+                </p>
+            </div>
             <Suspense fallback={<ProfileSkeleton />}>
                 <ProfileContent/>
             </Suspense>

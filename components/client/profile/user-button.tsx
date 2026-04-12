@@ -62,21 +62,21 @@ export default function UserButton() {
     const adminNavItems: NavigationItem[] = [
         {
             label: "Dashboard",
-            href: "/admin/dashboard/orders",
+            href: "/admin/dashboard",
             icon: LayoutDashboard,
         },
     ];
 
     const userNavItems: NavigationItem[] = [
         {
+            label: "My Account",
+            href: "/account",
+            icon: UserCircle,
+        },
+        {
             label: "My Orders",
             href: "/account/orders",
             icon: ShoppingBag,
-        },
-        {
-            label: "Profile",
-            href: "/account/profile",
-            icon: UserCircle,
         },
     ];
 
@@ -92,7 +92,7 @@ export default function UserButton() {
     if (!isLoggedIn) {
         navigationItems = [...authNavItems, ...userNavItems];
     } else if (isAdmin) {
-        navigationItems = adminNavItems;
+        navigationItems = [...adminNavItems, ...userNavItems];
     } else {
         navigationItems = userNavItems;
     }
