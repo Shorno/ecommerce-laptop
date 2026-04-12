@@ -21,7 +21,7 @@ export const createFeaturedImageSchema = z.object({
         .max(255, "URL must be at most 255 characters.")
         .trim(),
     placement: z
-        .enum(["carousel", "side"], { error: "Placement must be 'carousel' or 'side'." }),
+        .enum(["carousel", "side", "promo"], { error: "Placement must be 'carousel', 'side', or 'promo'." }),
 });
 
 
