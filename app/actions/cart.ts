@@ -1,23 +1,24 @@
 "use server"
 
-import { db } from "@/db/config";
+import {db} from "@/db/config"
+import {eq, and} from "drizzle-orm"
+import {auth} from "@/lib/auth"
+import {headers} from "next/headers"
 import { cart, cartItem } from "@/db/schema/cart";
-import { product } from "@/db/schema/product";
-import { eq, and } from "drizzle-orm";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import {product} from "@/db/schema/product";
 
 export interface CartItemData {
-    productId: number;
-    quantity: number;
-    priceAtAdd: string;
+    productId: number
+    quantity: number
+    priceAtAdd: string
+    variantId: number
 }
 
 // Get or create cart for user
 async function getOrCreateCart(userId: string) {
     const existingCart = await db.query.cart.findFirst({
         where: eq(cart.userId, userId),
-    });
+    })
 
     if (existingCart) {
         return existingCart;
@@ -27,9 +28,8 @@ async function getOrCreateCart(userId: string) {
         .insert(cart)
         .values({
             userId,
-            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         })
-        .returning();
+        .returning()
 
     return newCart;
 }
@@ -38,20 +38,21 @@ async function getOrCreateCart(userId: string) {
 export async function getCartItems() {
     try {
         const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+            headers: await headers()
+        })
 
         if (!session?.user?.id) {
             return { success: false, data: null, error: "Not authenticated" };
         }
 
-        const cart = await getOrCreateCart(session.user.id);
+        const userCart = await getOrCreateCart(session.user.id);
 
         const items = await db.query.cartItem.findMany({
-            where: eq(cartItem.cartId, cart.id),
+            where: eq(cartItem.cartId, userCart.id),
             with: {
                 product: true,
-            },
+                variant: true,
+            }
         });
 
         return { success: true, data: items, error: null };
@@ -62,19 +63,19 @@ export async function getCartItems() {
 }
 
 // Add item to cart
-export async function addToCart(productId: number, quantity: number = 1) {
+export async function addToCart(productId: number, quantity: number = 1, variantId: number) {
     try {
         const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+            headers: await headers()
+        })
 
         if (!session?.user?.id) {
             return { success: false, error: "Not authenticated" };
         }
 
-        const cart = await getOrCreateCart(session.user.id);
+        const userCart = await getOrCreateCart(session.user.id);
 
-        // Get product to get current price
+        // Get product/variant price for storing
         const productData = await db.query.product.findFirst({
             where: eq(product.id, productId),
         });
@@ -83,34 +84,36 @@ export async function addToCart(productId: number, quantity: number = 1) {
             return { success: false, error: "Product not found" };
         }
 
-        // Check if item already exists in cart
+        // Check if item already exists in cart (same product + same variant)
         const existingItem = await db.query.cartItem.findFirst({
             where: and(
-                eq(cartItem.cartId, cart.id),
-                eq(cartItem.productId, productId)
-            ),
+                eq(cartItem.cartId, userCart.id),
+                eq(cartItem.productId, productId),
+                eq(cartItem.variantId, variantId)
+            )
         });
 
         if (existingItem) {
             // Update quantity
-            const newQuantity = existingItem.quantity + quantity;
-            const maxQuantity = productData.stockQuantity ?? Infinity;
-            const finalQuantity = Math.min(newQuantity, maxQuantity);
-
             await db
                 .update(cartItem)
                 .set({
-                    quantity: finalQuantity,
-                    updatedAt: new Date()
+                    quantity: existingItem.quantity + quantity,
                 })
                 .where(eq(cartItem.id, existingItem.id));
         } else {
-            // Insert new item
+            // Get the variant price
+            const {productVariant} = await import("@/db/schema/product")
+            const variant = await db.query.productVariant.findFirst({
+                where: eq(productVariant.id, variantId),
+            })
+
             await db.insert(cartItem).values({
-                cartId: cart.id,
+                cartId: userCart.id,
                 productId,
+                variantId,
                 quantity,
-                priceAtAdd: productData.price,
+                priceAtAdd: variant?.price || "0",
             });
         }
 
@@ -122,23 +125,24 @@ export async function addToCart(productId: number, quantity: number = 1) {
 }
 
 // Update cart item quantity
-export async function updateCartItemQuantity(productId: number, quantity: number) {
+export async function updateCartItemQuantity(productId: number, quantity: number, variantId: number) {
     try {
         const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+            headers: await headers()
+        })
 
         if (!session?.user?.id) {
             return { success: false, error: "Not authenticated" };
         }
 
-        const cart = await getOrCreateCart(session.user.id);
+        const userCart = await getOrCreateCart(session.user.id);
 
         const existingItem = await db.query.cartItem.findFirst({
             where: and(
-                eq(cartItem.cartId, cart.id),
-                eq(cartItem.productId, productId)
-            ),
+                eq(cartItem.cartId, userCart.id),
+                eq(cartItem.productId, productId),
+                eq(cartItem.variantId, variantId)
+            )
         });
 
         if (!existingItem) {
@@ -146,15 +150,11 @@ export async function updateCartItemQuantity(productId: number, quantity: number
         }
 
         if (quantity <= 0) {
-            // Remove item if quantity is 0 or less
             await db.delete(cartItem).where(eq(cartItem.id, existingItem.id));
         } else {
             await db
                 .update(cartItem)
-                .set({
-                    quantity,
-                    updatedAt: new Date()
-                })
+                .set({ quantity })
                 .where(eq(cartItem.id, existingItem.id));
         }
 
@@ -166,22 +166,23 @@ export async function updateCartItemQuantity(productId: number, quantity: number
 }
 
 // Remove item from cart
-export async function removeFromCart(productId: number) {
+export async function removeFromCart(productId: number, variantId: number) {
     try {
         const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+            headers: await headers()
+        })
 
         if (!session?.user?.id) {
             return { success: false, error: "Not authenticated" };
         }
 
-        const cart = await getOrCreateCart(session.user.id);
+        const userCart = await getOrCreateCart(session.user.id);
 
         await db.delete(cartItem).where(
             and(
-                eq(cartItem.cartId, cart.id),
-                eq(cartItem.productId, productId)
+                eq(cartItem.cartId, userCart.id),
+                eq(cartItem.productId, productId),
+                eq(cartItem.variantId, variantId)
             )
         );
 
@@ -192,85 +193,59 @@ export async function removeFromCart(productId: number) {
     }
 }
 
-// Sync local cart to database
-export async function syncCartToDatabase(items: CartItemData[]) {
-    try {
-        const session = await auth.api.getSession({
-            headers: await headers(),
-        });
-
-        if (!session?.user?.id) {
-            return { success: false, error: "Not authenticated" };
-        }
-
-        const cart = await getOrCreateCart(session.user.id);
-
-        // Get existing cart items
-        const existingItems = await db.query.cartItem.findMany({
-            where: eq(cartItem.cartId, cart.id),
-        });
-
-        // Create a map of existing items for quick lookup
-        const existingItemsMap = new Map(
-            existingItems.map((item) => [item.productId, item])
-        );
-
-        // Process each item from local cart
-        for (const item of items) {
-            const existingItem = existingItemsMap.get(item.productId);
-
-            if (existingItem) {
-                // Update existing item (use the higher quantity)
-                const maxQuantity = Math.max(existingItem.quantity, item.quantity);
-                await db
-                    .update(cartItem)
-                    .set({
-                        quantity: maxQuantity,
-                        updatedAt: new Date()
-                    })
-                    .where(eq(cartItem.id, existingItem.id));
-
-                // Remove from map so we know it was processed
-                existingItemsMap.delete(item.productId);
-            } else {
-                // Insert new item
-                await db.insert(cartItem).values({
-                    cartId: cart.id,
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    priceAtAdd: item.priceAtAdd,
-                });
-            }
-        }
-
-        // Note: We don't delete items that are in DB but not in local cart
-        // This preserves items that might have been added from another device
-
-        return { success: true, error: null };
-    } catch (error) {
-        console.error("Error syncing cart:", error);
-        return { success: false, error: "Failed to sync cart" };
-    }
-}
-
-// Clear cart
+// Clear entire cart
 export async function clearCart() {
     try {
         const session = await auth.api.getSession({
-            headers: await headers(),
-        });
+            headers: await headers()
+        })
 
         if (!session?.user?.id) {
             return { success: false, error: "Not authenticated" };
         }
 
-        const cart = await getOrCreateCart(session.user.id);
-
-        await db.delete(cartItem).where(eq(cartItem.cartId, cart.id));
+        const userCart = await getOrCreateCart(session.user.id);
+        await db.delete(cartItem).where(eq(cartItem.cartId, userCart.id));
 
         return { success: true, error: null };
     } catch (error) {
         console.error("Error clearing cart:", error);
         return { success: false, error: "Failed to clear cart" };
+    }
+}
+
+// Sync local cart to database
+export async function syncCartToDatabase(items: CartItemData[]) {
+    try {
+        const session = await auth.api.getSession({
+            headers: await headers()
+        })
+
+        if (!session?.user?.id) {
+            return { success: false, error: "Not authenticated" };
+        }
+
+        const userCart = await getOrCreateCart(session.user.id);
+
+        // Clear existing cart items
+        await db.delete(cartItem).where(eq(cartItem.cartId, userCart.id));
+
+        // Insert new items
+        if (items.length > 0) {
+            await db.insert(cartItem).values(
+                items.map(item => ({
+                    cartId: userCart.id,
+                    productId: item.productId,
+                    variantId: item.variantId,
+                    quantity: item.quantity,
+                    priceAtAdd: item.priceAtAdd,
+                }))
+            );
+        }
+
+        return { success: true, error: null };
+    } catch (error) {
+        console.error("Error syncing cart:", error);
+        return { success: false, error: "Failed to sync cart" };
     }
 }

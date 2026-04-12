@@ -1,7 +1,11 @@
 import FeaturedImages from "@/components/home/featured-images";
-import CategoryListing from "@/components/client/product/category-listing";
 import CategoryGrid from "@/components/home/category-grid";
 import FeaturedProducts from "@/components/home/featured-products";
+import PromoBanner from "@/components/home/promo-banner";
+import CategoryListing from "@/components/client/product/category-listing";
+import ValueProps from "@/components/home/value-props";
+import BrandShowcase from "@/components/home/brand-showcase";
+import NewsletterSection from "@/components/home/newsletter-section";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,13 +30,37 @@ function SectionSkeleton() {
     );
 }
 
+function PromoBannerSkeleton() {
+    return (
+        <div className="custom-container py-6 md:py-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-[220px] w-full rounded-xl" />
+                <Skeleton className="h-[220px] w-full rounded-xl" />
+            </div>
+        </div>
+    );
+}
+
+function BrandSkeleton() {
+    return (
+        <div className="custom-container py-8">
+            <Skeleton className="h-8 w-40 mb-6" />
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} className="aspect-[3/2] w-full rounded-lg" />
+                ))}
+            </div>
+        </div>
+    );
+}
+
 export default function HomePage() {
     return (
         <div className="bg-tech-bg dark:bg-background min-h-screen">
-            {/* Hero Carousel */}
+            {/* 1. Hero Carousel + Side Banners */}
             <FeaturedImages />
 
-            {/* Category Grid */}
+            {/* 2. Browse Categories */}
             <Suspense fallback={
                 <div className="custom-container py-8">
                     <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
@@ -45,15 +73,31 @@ export default function HomePage() {
                 <CategoryGrid />
             </Suspense>
 
-            {/* Featured Products */}
+            {/* 3. Featured Products */}
             <Suspense fallback={<SectionSkeleton />}>
                 <FeaturedProducts />
             </Suspense>
 
-            {/* Category-wise Product Listings */}
+            {/* 4. Promotional Banners — visual break */}
+            <Suspense fallback={<PromoBannerSkeleton />}>
+                <PromoBanner />
+            </Suspense>
+
+            {/* 5. Category-wise Product Listings */}
             <Suspense fallback={<SectionSkeleton />}>
                 <CategoryListing />
             </Suspense>
+
+            {/* 6. Value Propositions — trust signals */}
+            <ValueProps />
+
+            {/* 7. Brand Showcase */}
+            <Suspense fallback={<BrandSkeleton />}>
+                <BrandShowcase />
+            </Suspense>
+
+            {/* 8. Newsletter CTA */}
+            <NewsletterSection />
         </div>
     )
 }

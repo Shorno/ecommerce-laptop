@@ -5,7 +5,7 @@ import { CartItem } from "@/stote/cart-sotre"
 export interface OrderItem {
     id: number
     productName: string
-    productSize: string
+    variantLabel: string
     productImage: string
     quantity: number
     unitPrice: string

@@ -3,7 +3,7 @@
 import {CreateProductFormValues, createProductSchema} from "@/lib/schemas/product.schema";
 import {z} from "zod";
 import {db} from "@/db/config";
-import {product, productImage} from "@/db/schema/product";
+import {product, productImage, productOption, productVariant} from "@/db/schema/product";
 import {revalidatePath} from "next/cache";
 import {checkAuth} from "@/app/actions/auth/checkAuth";
 
@@ -23,7 +23,7 @@ export type ActionResult<TData = unknown> =
 
 export default async function createProduct(
     formData: CreateProductFormValues
-): Promise<ActionResult<CreateProductFormValues>> {
+): Promise<ActionResult> {
     const session = await checkAuth()
 
     if (!session?.user || session?.user.role !== "admin") {
@@ -47,23 +47,55 @@ export default async function createProduct(
         }
 
         const validData = result.data
-        const { additionalImages, ...productData } = validData
+        const {additionalImages, options, variants, ...productData} = validData
 
-        const newProduct = await db.insert(product).values({
-            ...productData,
-            price: productData.price,
-            subCategoryId: productData.subCategoryId || null,
-        }).returning()
+        await db.transaction(async (tx) => {
+            // 1. Insert product
+            const [newProduct] = await tx.insert(product).values({
+                ...productData,
+                subCategoryId: productData.subCategoryId || null,
+                minPrice: Math.min(...variants.map(v => parseFloat(v.price))).toString(),
+            }).returning()
 
-        // Insert additional images if provided
-        if (additionalImages && additionalImages.length > 0) {
-            await db.insert(productImage).values(
-                additionalImages.map((imageUrl) => ({
-                    productId: newProduct[0].id,
-                    imageUrl: imageUrl,
+            const productId = newProduct.id
+
+            // 2. Insert additional images
+            if (additionalImages && additionalImages.length > 0) {
+                await tx.insert(productImage).values(
+                    additionalImages.map((imageUrl) => ({
+                        productId,
+                        imageUrl,
+                    }))
+                )
+            }
+
+            // 3. Insert options
+            if (options && options.length > 0) {
+                await tx.insert(productOption).values(
+                    options.map((opt) => ({
+                        productId,
+                        name: opt.name,
+                        position: opt.position,
+                        values: JSON.stringify(opt.values),
+                    }))
+                )
+            }
+
+            // 4. Insert variants
+            await tx.insert(productVariant).values(
+                variants.map((v, index) => ({
+                    productId,
+                    sku: v.sku || null,
+                    price: v.price,
+                    stock: v.stock,
+                    inStock: v.inStock,
+                    optionValues: Object.keys(v.optionValues || {}).length > 0
+                        ? JSON.stringify(v.optionValues)
+                        : null,
+                    sortOrder: index,
                 }))
             )
-        }
+        })
 
         revalidatePath("/products")
         revalidatePath("/")
@@ -71,11 +103,7 @@ export default async function createProduct(
         return {
             success: true,
             status: 201,
-            data: {
-                ...newProduct[0],
-                additionalImages,
-                subCategoryId: newProduct[0].subCategoryId ?? undefined,
-            },
+            data: null,
             message: "Product created successfully",
         }
     } catch (error) {

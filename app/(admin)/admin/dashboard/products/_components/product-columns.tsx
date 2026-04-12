@@ -1,8 +1,9 @@
 "use client"
 
 import {ColumnDef} from "@tanstack/react-table"
-import {ArrowUpDown, MoreHorizontal} from "lucide-react"
+import {ArrowUpDown, MoreHorizontal, Pencil} from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 import {Button} from "@/components/ui/button"
 import {
@@ -11,9 +12,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {Badge} from "@/components/ui/badge"
-import {Product, ProductImage} from "@/db/schema/product"
+import {Product, ProductImage, ProductOption, ProductVariant} from "@/db/schema/product"
 import {Category, SubCategory} from "@/db/schema/category"
-import EditProductDialog from "./edit-product-dialog"
 import DeleteProductDialog from "./delete-product-dialog"
 import { useTranslations } from "next-intl"
 
@@ -21,6 +21,8 @@ export interface ProductWithRelations extends Product {
     images: ProductImage[]
     category: Category
     subCategory: SubCategory | null
+    options: ProductOption[]
+    variants: ProductVariant[]
 }
 
 export function useProductColumns() {
@@ -80,65 +82,42 @@ export function useProductColumns() {
             },
         },
         {
-            accessorKey: "size",
-            header: () => <div className="text-center">{t('size')}</div>,
-            cell: ({row}) => (
-                <div className="text-center">{row.getValue("size")}</div>
-            ),
-        },
-        {
-            accessorKey: "price",
-            header: ({column}) => {
-                return (
-                    <div className="flex justify-center">
-                        <Button
-                            variant="ghost"
-                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        >
-                            {t('price')}
-                            <ArrowUpDown className="ml-2 h-4 w-4"/>
-                        </Button>
-                    </div>
-                )
-            },
+            id: "price",
+            header: () => <div className="text-center">{t('price')}</div>,
             cell: ({row}) => {
-                const price = parseFloat(row.getValue("price"))
-                const formatted = new Intl.NumberFormat("en-US", {
+                const product = row.original
+                const variants = product.variants || []
+                if (variants.length === 0) {
+                    return <div className="text-center text-muted-foreground">No variants</div>
+                }
+                const prices = variants.map(v => parseFloat(v.price))
+                const minPrice = Math.min(...prices)
+                const maxPrice = Math.max(...prices)
+                const formatted = (p: number) => new Intl.NumberFormat("en-US", {
                     style: "currency",
-                    currency: "USD",
-                }).format(price)
-                return <div className="text-center font-medium">{formatted}</div>
-            },
-        },
-        {
-            accessorKey: "stockQuantity",
-            header: ({column}) => {
+                    currency: "BDT",
+                }).format(p)
+
                 return (
-                    <div className="flex justify-center">
-                        <Button
-                            variant="ghost"
-                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                        >
-                            {t('stock')}
-                            <ArrowUpDown className="ml-2 h-4 w-4"/>
-                        </Button>
+                    <div className="text-center font-medium">
+                        {minPrice === maxPrice
+                            ? formatted(minPrice)
+                            : `${formatted(minPrice)} - ${formatted(maxPrice)}`
+                        }
                     </div>
                 )
             },
-            cell: ({row}) => (
-                <div className="text-center">{row.getValue("stockQuantity")}</div>
-            ),
         },
         {
-            accessorKey: "inStock",
-            header: () => <div className="text-center">{t('status')}</div>,
+            id: "variants",
+            header: () => <div className="text-center">Variants</div>,
             cell: ({row}) => {
-                const inStock = row.getValue("inStock") as boolean
+                const variants = row.original.variants || []
+                const totalStock = variants.reduce((sum, v) => sum + v.stock, 0)
                 return (
-                    <div className="flex justify-center">
-                        <Badge variant={inStock ? "default" : "secondary"}>
-                            {inStock ? t('active') : t('inactive')}
-                        </Badge>
+                    <div className="text-center">
+                        <div className="font-medium">{variants.length} variant{variants.length !== 1 ? "s" : ""}</div>
+                        <div className="text-xs text-muted-foreground">{totalStock} total stock</div>
                     </div>
                 )
             },
@@ -174,7 +153,12 @@ export function useProductColumns() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <EditProductDialog product={product}/>
+                                <Link href={`/admin/dashboard/products/edit/${product.id}`}>
+                                    <Button variant="ghost" size="sm" className="w-full justify-start">
+                                        <Pencil className="h-4 w-4 mr-2"/>
+                                        Edit
+                                    </Button>
+                                </Link>
                                 <DeleteProductDialog
                                     productId={product.id}
                                     productName={product.name}

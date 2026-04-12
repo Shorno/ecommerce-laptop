@@ -8,6 +8,8 @@ export default async function getProducts() {
             category: true,
             subCategory: true,
             images: true,
+            options: true,
+            variants: true,
         },
         orderBy: (product, { desc }) => [desc(product.createdAt)]
     })

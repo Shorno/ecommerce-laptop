@@ -1,17 +1,16 @@
 "use client"
 
 import * as React from "react"
-import {useState} from "react"
+import {useState, useCallback} from "react"
 import {useRouter} from "next/navigation"
 import {useForm} from "@tanstack/react-form"
 import {toast} from "sonner"
-import {ArrowLeft, Eye, EyeOff, Hash, Loader, Star} from "lucide-react"
+import {ArrowLeft, Loader, Star} from "lucide-react"
 import Link from "next/link"
 
 import {Button} from "@/components/ui/button"
 import {
     Field,
-    FieldDescription,
     FieldError,
     FieldLabel,
 } from "@/components/ui/field"
@@ -33,11 +32,26 @@ import {useCategories, useSubCategories} from "@/hooks/use-categories"
 import {useMutation, useQueryClient} from "@tanstack/react-query"
 import {Separator} from "@/components/ui/separator"
 import {Label} from "@/components/ui/label"
+import RichTextEditor from "@/components/ui/rich-text-editor"
+import SpecificationBuilder, {SpecGroup} from "@/components/ui/specification-builder"
+import KeyFeaturesBuilder, {KeyFeature} from "@/components/ui/key-features-builder"
+import ProductOptionBuilder, {ProductOptionData} from "@/components/ui/product-option-builder"
+import VariantTableBuilder, {VariantData} from "@/components/ui/variant-table-builder"
 
 export default function NewProductForm() {
     const router = useRouter()
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
     const queryClient = useQueryClient()
+
+    // Local state for options (managed outside TanStack Form for reactivity)
+    const [options, setOptions] = useState<ProductOptionData[]>([])
+    const [variants, setVariants] = useState<VariantData[]>([{
+        sku: "",
+        price: "",
+        stock: 0,
+        inStock: true,
+        optionValues: {},
+    }])
 
     const {data: categories = []} = useCategories()
     const subCategories = useSubCategories(selectedCategory)
@@ -75,27 +89,69 @@ export default function NewProductForm() {
             slug: "",
             categoryId: 0,
             subCategoryId: undefined as number | undefined,
-            size: "",
-            price: "",
-            stockQuantity: 0,
             image: "",
             additionalImages: [] as string[],
-            inStock: true,
             isFeatured: false,
-        },
-        validators: {
-            //@ts-ignore
-            onSubmit: createProductSchema,
+            keyFeatures: "",
+            description: "",
+            specifications: "",
         },
         onSubmit: async ({value}) => {
-            mutation.mutate(value)
+            // Merge options + variants into the form data
+            const formData = {
+                ...value,
+                options: options.filter(o => o.name && o.values.length > 0).map((o, i) => ({
+                    name: o.name,
+                    values: o.values,
+                    position: i,
+                })),
+                variants: variants.map(v => ({
+                    sku: v.sku,
+                    price: v.price,
+                    stock: v.stock,
+                    inStock: v.inStock,
+                    optionValues: v.optionValues,
+                })),
+            }
+
+            // Validate with Zod
+            const result = createProductSchema.safeParse(formData)
+            if (!result.success) {
+                const errors = result.error.flatten()
+                const fieldMessages: string[] = []
+
+                // Collect field-level errors
+                for (const [field, msgs] of Object.entries(errors.fieldErrors)) {
+                    if (msgs && msgs.length > 0) {
+                        fieldMessages.push(`${field}: ${(msgs as string[]).join(", ")}`)
+                    }
+                }
+
+                // Collect form-level errors
+                if (errors.formErrors.length > 0) {
+                    fieldMessages.push(...errors.formErrors)
+                }
+
+                const description = fieldMessages.length > 0
+                    ? fieldMessages.join("\n")
+                    : "Unknown validation error"
+
+                toast.error("Validation failed", {
+                    description,
+                    duration: 8000,
+                })
+                console.error("Validation errors:", JSON.stringify(errors, null, 2))
+                return
+            }
+
+            mutation.mutate(result.data)
         },
     })
 
-    const autoGenerateSlugFromName = (value: string) => {
+    const autoGenerateSlugFromName = useCallback((value: string) => {
         const generatedSlug = generateSlug(value)
         form.setFieldValue("slug", generatedSlug)
-    }
+    }, [form])
 
     return (
         <div className="min-h-screen bg-background">
@@ -150,11 +206,10 @@ export default function NewProductForm() {
                 <div className="flex flex-col lg:flex-row">
                     {/* ── Main Content Area ── */}
                     <main className="flex-1 p-3 sm:p-4 lg:p-6 space-y-6 order-2 lg:order-1">
-                        {/* Product Name — large input like a CMS title */}
+                        {/* Product Name */}
                         <form.Field name="name">
                             {(field) => {
-                                const isInvalid =
-                                    field.state.meta.isTouched && !field.state.meta.isValid
+                                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                 return (
                                     <Field data-invalid={isInvalid}>
                                         <Input
@@ -171,9 +226,7 @@ export default function NewProductForm() {
                                             autoComplete="off"
                                             className="text-2xl font-semibold h-auto py-3 border-0 border-b rounded-none focus-visible:ring-0 focus-visible:border-primary px-2"
                                         />
-                                        {isInvalid && (
-                                            <FieldError errors={field.state.meta.errors}/>
-                                        )}
+                                        {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                     </Field>
                                 )
                             }}
@@ -182,13 +235,11 @@ export default function NewProductForm() {
                         {/* Slug / Permalink */}
                         <form.Field name="slug">
                             {(field) => {
-                                const isInvalid =
-                                    field.state.meta.isTouched && !field.state.meta.isValid
+                                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                 return (
                                     <Field data-invalid={isInvalid}>
                                         <div className="flex flex-col gap-2">
-                                            <div
-                                                className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                 <span>Permalink:</span>
                                                 <Input
                                                     id={field.name}
@@ -205,109 +256,48 @@ export default function NewProductForm() {
                                             {field.state.value && (
                                                 <div className="flex items-center gap-2 text-sm">
                                                     <span className="text-muted-foreground">Preview:</span>
-                                                    <code
-                                                        className="bg-muted px-2 py-1 rounded text-xs font-mono">
+                                                    <code className="bg-muted px-2 py-1 rounded text-xs font-mono">
                                                         /product/{field.state.value}
                                                     </code>
                                                 </div>
                                             )}
                                         </div>
-                                        {isInvalid && (
-                                            <FieldError errors={field.state.meta.errors}/>
-                                        )}
+                                        {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                     </Field>
                                 )
                             }}
                         </form.Field>
 
-                        {/* ── Pricing & Inventory Card ── */}
+                        {/* ── Options Card ── */}
                         <div className="rounded-lg border bg-card shadow-sm">
                             <div className="p-4 border-b">
-                                <h3 className="text-sm font-semibold">Pricing & Inventory</h3>
-                                <p className="text-xs text-muted-foreground mt-0.5">Set the pricing and stock information</p>
+                                <h3 className="text-sm font-semibold">Product Options</h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                    Define attributes like RAM/Storage, Color etc. Variants will be auto-generated from combinations.
+                                </p>
                             </div>
-                            <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                {/* Price */}
-                                <form.Field name="price">
-                                    {(field) => {
-                                        const isInvalid =
-                                            field.state.meta.isTouched && !field.state.meta.isValid
-                                        return (
-                                            <Field data-invalid={isInvalid}>
-                                                <FieldLabel htmlFor={field.name}>Price (৳) *</FieldLabel>
-                                                <Input
-                                                    id={field.name}
-                                                    name={field.name}
-                                                    type="text"
-                                                    value={field.state.value}
-                                                    onBlur={field.handleBlur}
-                                                    onChange={(e) => field.handleChange(e.target.value)}
-                                                    aria-invalid={isInvalid}
-                                                    placeholder="45000"
-                                                    autoComplete="off"
-                                                />
-                                                {isInvalid && (
-                                                    <FieldError errors={field.state.meta.errors}/>
-                                                )}
-                                            </Field>
-                                        )
-                                    }}
-                                </form.Field>
+                            <div className="p-4">
+                                <ProductOptionBuilder
+                                    value={options}
+                                    onChange={setOptions}
+                                />
+                            </div>
+                        </div>
 
-                                {/* Size / Variant */}
-                                <form.Field name="size">
-                                    {(field) => {
-                                        const isInvalid =
-                                            field.state.meta.isTouched && !field.state.meta.isValid
-                                        return (
-                                            <Field data-invalid={isInvalid}>
-                                                <FieldLabel htmlFor={field.name}>Size / Variant
-                                                    *</FieldLabel>
-                                                <Input
-                                                    id={field.name}
-                                                    name={field.name}
-                                                    value={field.state.value}
-                                                    onBlur={field.handleBlur}
-                                                    onChange={(e) => field.handleChange(e.target.value)}
-                                                    aria-invalid={isInvalid}
-                                                    placeholder='15.6", 8GB/512GB'
-                                                    autoComplete="off"
-                                                />
-                                                {isInvalid && (
-                                                    <FieldError errors={field.state.meta.errors}/>
-                                                )}
-                                            </Field>
-                                        )
-                                    }}
-                                </form.Field>
-
-                                {/* Stock Quantity */}
-                                <form.Field name="stockQuantity">
-                                    {(field) => {
-                                        const isInvalid =
-                                            field.state.meta.isTouched && !field.state.meta.isValid
-                                        return (
-                                            <Field data-invalid={isInvalid}>
-                                                <FieldLabel htmlFor={field.name}>Stock
-                                                    Quantity</FieldLabel>
-                                                <Input
-                                                    id={field.name}
-                                                    name={field.name}
-                                                    type="number"
-                                                    value={field.state.value}
-                                                    onBlur={field.handleBlur}
-                                                    onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
-                                                    aria-invalid={isInvalid}
-                                                    placeholder="100"
-                                                    autoComplete="off"
-                                                />
-                                                {isInvalid && (
-                                                    <FieldError errors={field.state.meta.errors}/>
-                                                )}
-                                            </Field>
-                                        )
-                                    }}
-                                </form.Field>
+                        {/* ── Variants Card ── */}
+                        <div className="rounded-lg border bg-card shadow-sm">
+                            <div className="p-4 border-b">
+                                <h3 className="text-sm font-semibold">Variants & Pricing</h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                    Set price, stock, and SKU for each variant. At least one variant is required.
+                                </p>
+                            </div>
+                            <div className="p-4">
+                                <VariantTableBuilder
+                                    value={variants}
+                                    onChange={setVariants}
+                                    options={options}
+                                />
                             </div>
                         </div>
 
@@ -315,14 +305,12 @@ export default function NewProductForm() {
                         <div className="rounded-lg border bg-card shadow-sm">
                             <div className="p-4 border-b">
                                 <h3 className="text-sm font-semibold">Gallery</h3>
-                                <p className="text-xs text-muted-foreground mt-0.5">Upload additional product images
-                                    (max 6)</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">Upload additional product images (max 6)</p>
                             </div>
                             <div className="p-4">
                                 <form.Field name="additionalImages">
                                     {(field) => {
-                                        const isInvalid =
-                                            field.state.meta.isTouched && !field.state.meta.isValid
+                                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                         return (
                                             <Field data-invalid={isInvalid}>
                                                 <AdditionalImagesUploader
@@ -331,9 +319,78 @@ export default function NewProductForm() {
                                                     folder="products/additional"
                                                     maxSizeMB={5}
                                                 />
-                                                {isInvalid && (
-                                                    <FieldError errors={field.state.meta.errors}/>
-                                                )}
+                                                {isInvalid && <FieldError errors={field.state.meta.errors}/>}
+                                            </Field>
+                                        )
+                                    }}
+                                </form.Field>
+                            </div>
+                        </div>
+
+                        {/* ── Key Features Card ── */}
+                        <div className="rounded-lg border bg-card shadow-sm">
+                            <div className="p-4 border-b">
+                                <h3 className="text-sm font-semibold">Key Features</h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">Quick specs shown on the product page</p>
+                            </div>
+                            <div className="p-4">
+                                <form.Field name="keyFeatures">
+                                    {(field) => {
+                                        const featuresData: KeyFeature[] = field.state.value
+                                            ? (() => { try { return JSON.parse(field.state.value) } catch { return [] } })()
+                                            : []
+                                        return (
+                                            <Field>
+                                                <KeyFeaturesBuilder
+                                                    value={featuresData}
+                                                    onChange={(features) => field.handleChange(JSON.stringify(features))}
+                                                />
+                                            </Field>
+                                        )
+                                    }}
+                                </form.Field>
+                            </div>
+                        </div>
+
+                        {/* ── Description Card ── */}
+                        <div className="rounded-lg border bg-card shadow-sm">
+                            <div className="p-4 border-b">
+                                <h3 className="text-sm font-semibold">Product Description</h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">Rich text description shown on the product page</p>
+                            </div>
+                            <div className="p-4">
+                                <form.Field name="description">
+                                    {(field) => (
+                                        <Field>
+                                            <RichTextEditor
+                                                value={field.state.value}
+                                                onChange={field.handleChange}
+                                                placeholder="Write a detailed product description..."
+                                            />
+                                        </Field>
+                                    )}
+                                </form.Field>
+                            </div>
+                        </div>
+
+                        {/* ── Specifications Card ── */}
+                        <div className="rounded-lg border bg-card shadow-sm">
+                            <div className="p-4 border-b">
+                                <h3 className="text-sm font-semibold">Specifications</h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">Grouped technical specifications</p>
+                            </div>
+                            <div className="p-4">
+                                <form.Field name="specifications">
+                                    {(field) => {
+                                        const specData: SpecGroup[] = field.state.value
+                                            ? (() => { try { return JSON.parse(field.state.value) } catch { return [] } })()
+                                            : []
+                                        return (
+                                            <Field>
+                                                <SpecificationBuilder
+                                                    value={specData}
+                                                    onChange={(groups) => field.handleChange(JSON.stringify(groups))}
+                                                />
                                             </Field>
                                         )
                                     }}
@@ -343,16 +400,13 @@ export default function NewProductForm() {
                     </main>
 
                     {/* ── Sidebar ── */}
-                    <aside
-                        className="w-full lg:w-80 border-b lg:border-b-0 lg:border-l bg-muted/30 p-3 sm:p-4 lg:p-6 space-y-4 lg:space-y-6 order-1 lg:order-2">
-
+                    <aside className="w-full lg:w-80 border-b lg:border-b-0 lg:border-l bg-muted/30 p-3 sm:p-4 lg:p-6 space-y-4 lg:space-y-6 order-1 lg:order-2">
                         {/* Featured Image */}
                         <div className="space-y-3">
                             <Label className="text-sm font-medium">Featured Image *</Label>
                             <form.Field name="image">
                                 {(field) => {
-                                    const isInvalid =
-                                        field.state.meta.isTouched && !field.state.meta.isValid
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                     return (
                                         <Field data-invalid={isInvalid}>
                                             <ImageUploader
@@ -361,9 +415,7 @@ export default function NewProductForm() {
                                                 folder="products"
                                                 maxSizeMB={5}
                                             />
-                                            {isInvalid && (
-                                                <FieldError errors={field.state.meta.errors}/>
-                                            )}
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                         </Field>
                                     )
                                 }}
@@ -376,15 +428,12 @@ export default function NewProductForm() {
                         <div className="space-y-3">
                             <Label className="text-sm font-medium">Organization</Label>
 
-                            {/* Category */}
                             <form.Field name="categoryId">
                                 {(field) => {
-                                    const isInvalid =
-                                        field.state.meta.isTouched && !field.state.meta.isValid
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                     return (
                                         <Field data-invalid={isInvalid}>
-                                            <Label className="text-xs text-muted-foreground">Category
-                                                *</Label>
+                                            <Label className="text-xs text-muted-foreground">Category *</Label>
                                             <Select
                                                 value={field.state.value ? field.state.value.toString() : undefined}
                                                 onValueChange={(value) => {
@@ -399,30 +448,24 @@ export default function NewProductForm() {
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {categories.map((cat) => (
-                                                        <SelectItem key={cat.id}
-                                                                    value={cat.id.toString()}>
+                                                        <SelectItem key={cat.id} value={cat.id.toString()}>
                                                             {cat.name}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            {isInvalid && (
-                                                <FieldError errors={field.state.meta.errors}/>
-                                            )}
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                         </Field>
                                     )
                                 }}
                             </form.Field>
 
-                            {/* Subcategory */}
                             <form.Field name="subCategoryId">
                                 {(field) => {
-                                    const isInvalid =
-                                        field.state.meta.isTouched && !field.state.meta.isValid
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                     return (
                                         <Field data-invalid={isInvalid}>
-                                            <Label
-                                                className="text-xs text-muted-foreground">Subcategory</Label>
+                                            <Label className="text-xs text-muted-foreground">Subcategory</Label>
                                             <Select
                                                 value={field.state.value?.toString() || "none"}
                                                 onValueChange={(value) => {
@@ -436,16 +479,13 @@ export default function NewProductForm() {
                                                 <SelectContent>
                                                     <SelectItem value="none">None</SelectItem>
                                                     {subCategories.map((subCat) => (
-                                                        <SelectItem key={subCat.id}
-                                                                    value={subCat.id.toString()}>
+                                                        <SelectItem key={subCat.id} value={subCat.id.toString()}>
                                                             {subCat.name}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            {isInvalid && (
-                                                <FieldError errors={field.state.meta.errors}/>
-                                            )}
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                         </Field>
                                     )
                                 }}
@@ -457,28 +497,6 @@ export default function NewProductForm() {
                         {/* Settings */}
                         <div className="space-y-4">
                             <Label className="text-sm font-medium">Settings</Label>
-
-                            <form.Field name="inStock">
-                                {(field) => (
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            {field.state.value ? (
-                                                <Eye className="h-4 w-4 text-muted-foreground"/>
-                                            ) : (
-                                                <EyeOff className="h-4 w-4 text-muted-foreground"/>
-                                            )}
-                                            <Label htmlFor={field.name} className="text-sm cursor-pointer">
-                                                In Stock
-                                            </Label>
-                                        </div>
-                                        <Switch
-                                            id={field.name}
-                                            checked={field.state.value}
-                                            onCheckedChange={field.handleChange}
-                                        />
-                                    </div>
-                                )}
-                            </form.Field>
 
                             <form.Field name="isFeatured">
                                 {(field) => (

@@ -19,7 +19,13 @@ export default async function getProductBySlug(slug: string) {
                         name: true
                     }
                 },
-                images: true
+                images: true,
+                options: {
+                    orderBy: (option: any, { asc }: any) => [asc(option.position)]
+                },
+                variants: {
+                    orderBy: (variant: any, { asc }: any) => [asc(variant.sortOrder)]
+                }
             }
         });
 

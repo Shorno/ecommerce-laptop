@@ -82,10 +82,11 @@ export const orderItem = pgTable("order_item", {
     productId: integer("product_id")
         .notNull()
         .references(() => product.id, { onDelete: "restrict" }),
+    variantId: integer("variant_id"),
 
-    // Product snapshot at time of order
+    // Snapshot at time of order
     productName: varchar("product_name", { length: 150 }).notNull(),
-    productSize: varchar("product_size", { length: 50 }).notNull(),
+    variantLabel: varchar("variant_label", { length: 150 }).notNull(),
     productImage: varchar("product_image", { length: 255 }).notNull(),
 
     quantity: integer("quantity").notNull(),

@@ -81,7 +81,7 @@ export default async function PaymentPage({searchParams}: PaymentPageProps) {
                                         <div className="flex-1 min-w-0">
                                             <p className="font-medium text-sm truncate">{item.productName}</p>
                                             <p className="text-xs text-muted-foreground">
-                                                {item.productSize} • Qty: {item.quantity}
+                                                {item.variantLabel} • Qty: {item.quantity}
                                             </p>
                                         </div>
                                         <div className="text-right flex-shrink-0">

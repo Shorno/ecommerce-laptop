@@ -72,7 +72,7 @@ export default function EditFeaturedImageDialog({ featuredImage }: EditFeaturedI
             subtitle: featuredImage.subtitle,
             cta: featuredImage.cta,
             ctaLink: featuredImage.ctaLink,
-            placement: (featuredImage.placement || "carousel") as "carousel" | "side",
+            placement: (featuredImage.placement || "carousel") as "carousel" | "side" | "promo",
         },
         validators: {
             onSubmit: editFeaturedImageSchema,
@@ -182,11 +182,12 @@ export default function EditFeaturedImageDialog({ featuredImage }: EditFeaturedI
                                         return (
                                             <Field data-invalid={isInvalid}>
                                                 <FieldLabel htmlFor={field.name}>Placement *</FieldLabel>
-                                                <Select value={field.state.value} onValueChange={(val) => field.handleChange(val as "carousel" | "side")}>
+                                                <Select value={field.state.value} onValueChange={(val) => field.handleChange(val as "carousel" | "side" | "promo")}>
                                                     <SelectTrigger><SelectValue placeholder="Select placement" /></SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="carousel">Main Carousel</SelectItem>
                                                         <SelectItem value="side">Side Banner</SelectItem>
+                                                        <SelectItem value="promo">Promotional Banner</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                                 {isInvalid && <FieldError errors={field.state.meta.errors} />}

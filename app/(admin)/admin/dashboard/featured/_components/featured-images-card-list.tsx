@@ -44,8 +44,8 @@ export default function FeaturedImagesCardList() {
 
                     {/* Placement badge */}
                     <div className="absolute top-4 left-4 z-20">
-                        <Badge variant={featured.placement === "side" ? "secondary" : "default"} className="text-xs">
-                            {featured.placement === "side" ? "Side Banner" : "Carousel"}
+                        <Badge variant={featured.placement === "carousel" ? "default" : "secondary"} className="text-xs">
+                            {featured.placement === "side" ? "Side Banner" : featured.placement === "promo" ? "Promo Banner" : "Carousel"}
                         </Badge>
                     </div>
 

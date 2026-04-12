@@ -13,9 +13,7 @@ type SearchResult = {
     name: string;
     slug: string;
     image: string;
-    price: string;
-    size: string;
-    inStock: boolean;
+    minPrice: string | null;
     category: {
         name: string;
         slug: string;
@@ -206,13 +204,9 @@ export default function InlineSearch({className = "", placeholder = "Search prod
                                                     <h4 className="font-medium text-sm text-foreground truncate">{product.name}</h4>
                                                     <div className="flex items-center gap-2 mt-0.5">
                                                         <span
-                                                            className="text-sm font-semibold text-tech-accent">৳{product.price}</span>
+                                                            className="text-sm font-semibold text-tech-accent">{product.minPrice ? `৳${product.minPrice}` : 'Price TBD'}</span>
                                                         <span
                                                             className="text-xs text-muted-foreground">• {product.category.name}</span>
-                                                        {!product.inStock && (
-                                                            <span
-                                                                className="text-xs text-red-500 font-medium">• Out of Stock</span>
-                                                        )}
                                                     </div>
                                                 </div>
                                             </button>

@@ -327,7 +327,7 @@ export default function AdminOrderDetail({ orderId }: { orderId: number }) {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-semibold text-foreground line-clamp-2 sm:line-clamp-1">{item.productName}</p>
-                                <p className="text-xs text-muted-foreground mt-0.5">Variant: {item.productSize}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">Variant: {item.variantLabel}</p>
                                 <div className="flex items-center justify-between mt-2 sm:hidden">
                                     <span className="text-xs text-muted-foreground">Qty: {item.quantity}</span>
                                     <p className="text-sm font-bold">{formatPrice(parseFloat(item.subtotal))}</p>

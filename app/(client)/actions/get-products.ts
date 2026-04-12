@@ -47,15 +47,11 @@ export async function getProducts(params: GetProductsParams) {
     }
 
     if (minPrice) {
-        conditions.push(gte(product.price, minPrice))
+        conditions.push(gte(product.minPrice, minPrice))
     }
 
     if (maxPrice) {
-        conditions.push(lte(product.price, maxPrice))
-    }
-
-    if (inStock === "true") {
-        conditions.push(eq(product.inStock, true))
+        conditions.push(lte(product.minPrice, maxPrice))
     }
 
     if (search) {
@@ -66,10 +62,10 @@ export async function getProducts(params: GetProductsParams) {
     let orderBy
     switch (sort) {
         case "price-asc":
-            orderBy = [asc(product.price)]
+            orderBy = [asc(product.minPrice)]
             break
         case "price-desc":
-            orderBy = [desc(product.price)]
+            orderBy = [desc(product.minPrice)]
             break
         case "name-asc":
             orderBy = [asc(product.name)]
@@ -97,6 +93,7 @@ export async function getProducts(params: GetProductsParams) {
                     name: true,
                 },
             },
+            variants: true,
         },
         orderBy,
     })

@@ -53,27 +53,31 @@ export async function cancelOrder(orderId: number): Promise<CancelOrderResponse>
         }
 
         await db.transaction(async (tx) => {
-            // Restore stock for each order item
+            // Restore variant stock for each order item
             const orderItems = await tx.query.orderItem.findMany({
                 where: (oi, { eq }) => eq(oi.orderId, orderId),
             })
 
-            for (const item of orderItems) {
-                const [productData] = await tx
-                    .select({ stockQuantity: product.stockQuantity })
-                    .from(product)
-                    .where(eq(product.id, item.productId))
-                    .limit(1)
+            const { productVariant } = await import("@/db/schema/product")
 
-                if (productData) {
-                    const restoredStock = productData.stockQuantity + item.quantity
-                    await tx
-                        .update(product)
-                        .set({
-                            stockQuantity: restoredStock,
-                            inStock: true,
-                        })
-                        .where(eq(product.id, item.productId))
+            for (const item of orderItems) {
+                if (item.variantId) {
+                    const [variantData] = await tx
+                        .select({ stock: productVariant.stock })
+                        .from(productVariant)
+                        .where(eq(productVariant.id, item.variantId))
+                        .limit(1)
+
+                    if (variantData) {
+                        const restoredStock = variantData.stock + item.quantity
+                        await tx
+                            .update(productVariant)
+                            .set({
+                                stock: restoredStock,
+                                inStock: true,
+                            })
+                            .where(eq(productVariant.id, item.variantId))
+                    }
                 }
             }
 

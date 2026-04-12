@@ -3,7 +3,7 @@
 import {UpdateProductFormValues, updateProductSchema} from "@/lib/schemas/product.schema";
 import {z} from "zod";
 import {db} from "@/db/config";
-import {product, productImage} from "@/db/schema/product";
+import {product, productImage, productOption, productVariant} from "@/db/schema/product";
 import {eq} from "drizzle-orm";
 import {revalidatePath} from "next/cache";
 import {checkAuth} from "@/app/actions/auth/checkAuth";
@@ -24,7 +24,7 @@ export type ActionResult<TData = unknown> =
 
 export default async function updateProduct(
     formData: UpdateProductFormValues
-): Promise<ActionResult<UpdateProductFormValues>> {
+): Promise<ActionResult> {
     const session = await checkAuth()
 
     if (!session?.user || session?.user.role !== "admin") {
@@ -48,41 +48,64 @@ export default async function updateProduct(
         }
 
         const validData = result.data
-        const { id, additionalImages, ...updateData } = validData
+        const {id, additionalImages, options, variants, ...updateData} = validData
 
-        const updatedProduct = await db
-            .update(product)
-            .set({
-                ...updateData,
-                price: updateData.price,
-                subCategoryId: updateData.subCategoryId || null,
-            })
-            .where(eq(product.id, id))
-            .returning()
+        await db.transaction(async (tx) => {
+            // 1. Update product
+            const updatedProduct = await tx
+                .update(product)
+                .set({
+                    ...updateData,
+                    subCategoryId: updateData.subCategoryId || null,
+                    minPrice: Math.min(...variants.map(v => parseFloat(v.price))).toString(),
+                })
+                .where(eq(product.id, id))
+                .returning()
 
-        if (!updatedProduct.length) {
-            return {
-                success: false,
-                status: 404,
-                error: "Product not found",
+            if (!updatedProduct.length) {
+                throw new Error("Product not found")
             }
-        }
 
-        // Update additional images: delete existing and insert new ones
-        if (additionalImages !== undefined) {
-            // Delete existing additional images
-            await db.delete(productImage).where(eq(productImage.productId, id))
-
-            // Insert new additional images if provided
-            if (additionalImages.length > 0) {
-                await db.insert(productImage).values(
+            // 2. Replace additional images
+            await tx.delete(productImage).where(eq(productImage.productId, id))
+            if (additionalImages && additionalImages.length > 0) {
+                await tx.insert(productImage).values(
                     additionalImages.map((imageUrl) => ({
                         productId: id,
-                        imageUrl: imageUrl,
+                        imageUrl,
                     }))
                 )
             }
-        }
+
+            // 3. Replace options
+            await tx.delete(productOption).where(eq(productOption.productId, id))
+            if (options && options.length > 0) {
+                await tx.insert(productOption).values(
+                    options.map((opt) => ({
+                        productId: id,
+                        name: opt.name,
+                        position: opt.position,
+                        values: JSON.stringify(opt.values),
+                    }))
+                )
+            }
+
+            // 4. Replace variants
+            await tx.delete(productVariant).where(eq(productVariant.productId, id))
+            await tx.insert(productVariant).values(
+                variants.map((v, index) => ({
+                    productId: id,
+                    sku: v.sku || null,
+                    price: v.price,
+                    stock: v.stock,
+                    inStock: v.inStock,
+                    optionValues: Object.keys(v.optionValues || {}).length > 0
+                        ? JSON.stringify(v.optionValues)
+                        : null,
+                    sortOrder: index,
+                }))
+            )
+        })
 
         revalidatePath("/products")
         revalidatePath("/")
@@ -90,15 +113,19 @@ export default async function updateProduct(
         return {
             success: true,
             status: 200,
-            data: {
-                ...updatedProduct[0],
-                additionalImages,
-                subCategoryId: updatedProduct[0].subCategoryId ?? undefined,
-            },
+            data: null,
             message: "Product updated successfully",
         }
     } catch (error) {
         console.error("Error updating product:", error)
+
+        if (error instanceof Error && error.message === "Product not found") {
+            return {
+                success: false,
+                status: 404,
+                error: "Product not found",
+            }
+        }
 
         return {
             success: false,

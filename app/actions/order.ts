@@ -2,7 +2,7 @@
 
 import { db } from "@/db/config"
 import { order, orderItem, payment } from "@/db/schema"
-import { product } from "@/db/schema/product"
+import { productVariant } from "@/db/schema/product"
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 import { CreateOrderData, OrderResponse } from "@/lib/types/order"
@@ -15,7 +15,6 @@ function generateOrderNumber(): string {
 }
 
 export async function createOrder(data: CreateOrderData): Promise<OrderResponse> {
-    //remove ssl
     try {
         const session = await auth.api.getSession({
             headers: await headers()
@@ -42,40 +41,39 @@ export async function createOrder(data: CreateOrderData): Promise<OrderResponse>
         const shippingAmount = 0
         const totalAmount = subtotal + shippingAmount
 
-        // Generate order number
         const orderNumber = generateOrderNumber()
 
         const result = await db.transaction(async (tx) => {
-            // Verify stock availability and reserve stock
+            // Verify stock availability and reserve stock — now checks VARIANT stock
             for (const item of items) {
-                const [productData] = await tx
-                    .select({
-                        stockQuantity: product.stockQuantity,
-                        id: product.id
-                    })
-                    .from(product)
-                    .where(eq(product.id, item.id))
-                    .limit(1)
+                if (item.variantId) {
+                    const [variantData] = await tx
+                        .select({
+                            stock: productVariant.stock,
+                            id: productVariant.id
+                        })
+                        .from(productVariant)
+                        .where(eq(productVariant.id, item.variantId))
+                        .limit(1)
 
-                if (!productData) {
-                    throw new Error(`Product ${item.name} not found`)
+                    if (!variantData) {
+                        throw new Error(`Variant for ${item.name} not found`)
+                    }
+
+                    if (variantData.stock < item.quantity) {
+                        throw new Error(`Insufficient stock for ${item.name}. Available: ${variantData.stock}, Requested: ${item.quantity}`)
+                    }
+
+                    // Update variant stock
+                    const newStock = variantData.stock - item.quantity
+                    await tx
+                        .update(productVariant)
+                        .set({
+                            stock: newStock,
+                            inStock: newStock > 0
+                        })
+                        .where(eq(productVariant.id, item.variantId))
                 }
-
-                if (productData.stockQuantity < item.quantity) {
-                    throw new Error(`Insufficient stock for ${item.name}. Available: ${productData.stockQuantity}, Requested: ${item.quantity}`)
-                }
-
-                // Calculate new stock quantity
-                const newStockQuantity = productData.stockQuantity - item.quantity
-
-                // Update stock quantity atomically using Drizzle ORM
-                await tx
-                    .update(product)
-                    .set({
-                        stockQuantity: newStockQuantity,
-                        inStock: newStockQuantity > 0
-                    })
-                    .where(eq(product.id, item.id))
             }
 
             const [newOrder] = await tx.insert(order).values({
@@ -98,8 +96,9 @@ export async function createOrder(data: CreateOrderData): Promise<OrderResponse>
             const orderItemsData = items.map(item => ({
                 orderId: newOrder.id,
                 productId: item.id,
+                variantId: item.variantId || null,
                 productName: item.name,
-                productSize: item.size || "N/A",
+                variantLabel: item.variantLabel || "Default",
                 productImage: item.image || "",
                 quantity: item.quantity,
                 unitPrice: item.price.toString(),
@@ -134,16 +133,10 @@ export async function createOrder(data: CreateOrderData): Promise<OrderResponse>
 
         if (error instanceof Error) {
             if (error.message.includes("Insufficient stock")) {
-                return {
-                    success: false,
-                    error: error.message
-                }
+                return { success: false, error: error.message }
             }
             if (error.message.includes("not found")) {
-                return {
-                    success: false,
-                    error: error.message
-                }
+                return { success: false, error: error.message }
             }
         }
 
