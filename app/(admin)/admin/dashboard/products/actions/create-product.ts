@@ -75,6 +75,9 @@ export default async function createProduct(
                 ...newProduct[0],
                 additionalImages,
                 subCategoryId: newProduct[0].subCategoryId ?? undefined,
+                keyFeatures: newProduct[0].keyFeatures ?? "",
+                description: newProduct[0].description ?? "",
+                specifications: newProduct[0].specifications ?? "",
             },
             message: "Product created successfully",
         }

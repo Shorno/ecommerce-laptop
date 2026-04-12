@@ -5,7 +5,7 @@ import {useState} from "react"
 import {useRouter} from "next/navigation"
 import {useForm} from "@tanstack/react-form"
 import {toast} from "sonner"
-import {ArrowLeft, Eye, EyeOff, Hash, Loader, Star} from "lucide-react"
+import {ArrowLeft, Eye, EyeOff, Loader, Star} from "lucide-react"
 import Link from "next/link"
 
 import {Button} from "@/components/ui/button"
@@ -16,12 +16,12 @@ import {
     FieldLabel,
 } from "@/components/ui/field"
 import {Input} from "@/components/ui/input"
-import {createProductSchema} from "@/lib/schemas/product.schema"
+import {updateProductSchema} from "@/lib/schemas/product.schema"
 import {Switch} from "@/components/ui/switch"
 import ImageUploader from "@/components/ImageUploader"
 import AdditionalImagesUploader from "@/components/AdditionalImagesUploader"
 import {generateSlug} from "@/utils/generate-slug"
-import createProduct from "@/app/(admin)/admin/dashboard/products/actions/create-product"
+import updateProduct from "@/app/(admin)/admin/dashboard/products/actions/update-product"
 import {
     Select,
     SelectContent,
@@ -33,21 +33,42 @@ import {useCategories, useSubCategories} from "@/hooks/use-categories"
 import {useMutation, useQueryClient} from "@tanstack/react-query"
 import {Separator} from "@/components/ui/separator"
 import {Label} from "@/components/ui/label"
-import {Textarea} from "@/components/ui/textarea"
 import RichTextEditor from "@/components/ui/rich-text-editor"
 import SpecificationBuilder, {SpecGroup} from "@/components/ui/specification-builder"
 import KeyFeaturesBuilder, {KeyFeature} from "@/components/ui/key-features-builder"
 
-export default function NewProductForm() {
+interface EditProductFormProps {
+    product: {
+        id: number
+        name: string
+        slug: string
+        categoryId: number
+        subCategoryId: number | null
+        size: string
+        price: string
+        stockQuantity: number
+        image: string
+        inStock: boolean
+        isFeatured: boolean
+        keyFeatures: string | null
+        description: string | null
+        specifications: string | null
+        images: { id: number; imageUrl: string }[]
+        category: { id: number; name: string; slug: string }
+        subCategory: { id: number; name: string } | null
+    }
+}
+
+export default function EditProductForm({product}: EditProductFormProps) {
     const router = useRouter()
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+    const [selectedCategory, setSelectedCategory] = useState<number>(product.categoryId)
     const queryClient = useQueryClient()
 
     const {data: categories = []} = useCategories()
     const subCategories = useSubCategories(selectedCategory)
 
     const mutation = useMutation({
-        mutationFn: createProduct,
+        mutationFn: updateProduct,
         onSuccess: (result) => {
             if (!result.success) {
                 switch (result.status) {
@@ -59,6 +80,9 @@ export default function NewProductForm() {
                     case 401:
                         toast.error("You are not authorized to perform this action.")
                         break
+                    case 404:
+                        toast.error("Product not found.")
+                        break
                     default:
                         toast.error(result.error || "Something went wrong.")
                 }
@@ -69,30 +93,31 @@ export default function NewProductForm() {
             router.push("/admin/dashboard/products")
         },
         onError: () => {
-            toast.error("An unexpected error occurred while creating the product.")
+            toast.error("An unexpected error occurred while updating the product.")
         },
     })
 
     const form = useForm({
         defaultValues: {
-            name: "",
-            slug: "",
-            categoryId: 0,
-            subCategoryId: undefined as number | undefined,
-            size: "",
-            price: "",
-            stockQuantity: 0,
-            image: "",
-            additionalImages: [] as string[],
-            inStock: true,
-            isFeatured: false,
-            keyFeatures: "",
-            description: "",
-            specifications: "",
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            categoryId: product.categoryId,
+            subCategoryId: product.subCategoryId ?? undefined as number | undefined,
+            size: product.size,
+            price: product.price,
+            stockQuantity: product.stockQuantity,
+            image: product.image,
+            additionalImages: product.images?.map(img => img.imageUrl) || [] as string[],
+            inStock: product.inStock,
+            isFeatured: product.isFeatured,
+            keyFeatures: product.keyFeatures || "",
+            description: product.description || "",
+            specifications: product.specifications || "",
         },
         validators: {
             //@ts-ignore
-            onSubmit: createProductSchema,
+            onSubmit: updateProductSchema,
         },
         onSubmit: async ({value}) => {
             mutation.mutate(value)
@@ -118,8 +143,11 @@ export default function NewProductForm() {
                         </Button>
                         <div>
                             <h1 className="text-sm sm:text-lg font-semibold truncate max-w-[200px] sm:max-w-none">
-                                Create New Product
+                                Edit Product
                             </h1>
+                            <p className="text-xs text-muted-foreground truncate max-w-[200px] sm:max-w-none">
+                                {product.name}
+                            </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -140,7 +168,7 @@ export default function NewProductForm() {
                             disabled={mutation.isPending}
                         >
                             {mutation.isPending && <Loader className="mr-2 h-4 w-4 animate-spin"/>}
-                            Create Product
+                            Update Product
                         </Button>
                     </div>
                 </div>
@@ -157,7 +185,7 @@ export default function NewProductForm() {
                 <div className="flex flex-col lg:flex-row">
                     {/* ── Main Content Area ── */}
                     <main className="flex-1 p-3 sm:p-4 lg:p-6 space-y-6 order-2 lg:order-1">
-                        {/* Product Name — large input like a CMS title */}
+                        {/* Product Name */}
                         <form.Field name="name">
                             {(field) => {
                                 const isInvalid =
@@ -194,8 +222,7 @@ export default function NewProductForm() {
                                 return (
                                     <Field data-invalid={isInvalid}>
                                         <div className="flex flex-col gap-2">
-                                            <div
-                                                className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                 <span>Permalink:</span>
                                                 <Input
                                                     id={field.name}
@@ -212,8 +239,7 @@ export default function NewProductForm() {
                                             {field.state.value && (
                                                 <div className="flex items-center gap-2 text-sm">
                                                     <span className="text-muted-foreground">Preview:</span>
-                                                    <code
-                                                        className="bg-muted px-2 py-1 rounded text-xs font-mono">
+                                                    <code className="bg-muted px-2 py-1 rounded text-xs font-mono">
                                                         /product/{field.state.value}
                                                     </code>
                                                 </div>
@@ -234,11 +260,9 @@ export default function NewProductForm() {
                                 <p className="text-xs text-muted-foreground mt-0.5">Set the pricing and stock information</p>
                             </div>
                             <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                {/* Price */}
                                 <form.Field name="price">
                                     {(field) => {
-                                        const isInvalid =
-                                            field.state.meta.isTouched && !field.state.meta.isValid
+                                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                         return (
                                             <Field data-invalid={isInvalid}>
                                                 <FieldLabel htmlFor={field.name}>Price (৳) *</FieldLabel>
@@ -253,23 +277,18 @@ export default function NewProductForm() {
                                                     placeholder="45000"
                                                     autoComplete="off"
                                                 />
-                                                {isInvalid && (
-                                                    <FieldError errors={field.state.meta.errors}/>
-                                                )}
+                                                {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                             </Field>
                                         )
                                     }}
                                 </form.Field>
 
-                                {/* Size / Variant */}
                                 <form.Field name="size">
                                     {(field) => {
-                                        const isInvalid =
-                                            field.state.meta.isTouched && !field.state.meta.isValid
+                                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                         return (
                                             <Field data-invalid={isInvalid}>
-                                                <FieldLabel htmlFor={field.name}>Size / Variant
-                                                    *</FieldLabel>
+                                                <FieldLabel htmlFor={field.name}>Size / Variant *</FieldLabel>
                                                 <Input
                                                     id={field.name}
                                                     name={field.name}
@@ -280,23 +299,18 @@ export default function NewProductForm() {
                                                     placeholder='15.6", 8GB/512GB'
                                                     autoComplete="off"
                                                 />
-                                                {isInvalid && (
-                                                    <FieldError errors={field.state.meta.errors}/>
-                                                )}
+                                                {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                             </Field>
                                         )
                                     }}
                                 </form.Field>
 
-                                {/* Stock Quantity */}
                                 <form.Field name="stockQuantity">
                                     {(field) => {
-                                        const isInvalid =
-                                            field.state.meta.isTouched && !field.state.meta.isValid
+                                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                         return (
                                             <Field data-invalid={isInvalid}>
-                                                <FieldLabel htmlFor={field.name}>Stock
-                                                    Quantity</FieldLabel>
+                                                <FieldLabel htmlFor={field.name}>Stock Quantity</FieldLabel>
                                                 <Input
                                                     id={field.name}
                                                     name={field.name}
@@ -308,9 +322,7 @@ export default function NewProductForm() {
                                                     placeholder="100"
                                                     autoComplete="off"
                                                 />
-                                                {isInvalid && (
-                                                    <FieldError errors={field.state.meta.errors}/>
-                                                )}
+                                                {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                             </Field>
                                         )
                                     }}
@@ -322,14 +334,12 @@ export default function NewProductForm() {
                         <div className="rounded-lg border bg-card shadow-sm">
                             <div className="p-4 border-b">
                                 <h3 className="text-sm font-semibold">Gallery</h3>
-                                <p className="text-xs text-muted-foreground mt-0.5">Upload additional product images
-                                    (max 6)</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">Upload additional product images (max 6)</p>
                             </div>
                             <div className="p-4">
                                 <form.Field name="additionalImages">
                                     {(field) => {
-                                        const isInvalid =
-                                            field.state.meta.isTouched && !field.state.meta.isValid
+                                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                         return (
                                             <Field data-invalid={isInvalid}>
                                                 <AdditionalImagesUploader
@@ -338,9 +348,7 @@ export default function NewProductForm() {
                                                     folder="products/additional"
                                                     maxSizeMB={5}
                                                 />
-                                                {isInvalid && (
-                                                    <FieldError errors={field.state.meta.errors}/>
-                                                )}
+                                                {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                             </Field>
                                         )
                                     }}
@@ -421,16 +429,13 @@ export default function NewProductForm() {
                     </main>
 
                     {/* ── Sidebar ── */}
-                    <aside
-                        className="w-full lg:w-80 border-b lg:border-b-0 lg:border-l bg-muted/30 p-3 sm:p-4 lg:p-6 space-y-4 lg:space-y-6 order-1 lg:order-2">
-
+                    <aside className="w-full lg:w-80 border-b lg:border-b-0 lg:border-l bg-muted/30 p-3 sm:p-4 lg:p-6 space-y-4 lg:space-y-6 order-1 lg:order-2">
                         {/* Featured Image */}
                         <div className="space-y-3">
                             <Label className="text-sm font-medium">Featured Image *</Label>
                             <form.Field name="image">
                                 {(field) => {
-                                    const isInvalid =
-                                        field.state.meta.isTouched && !field.state.meta.isValid
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                     return (
                                         <Field data-invalid={isInvalid}>
                                             <ImageUploader
@@ -439,9 +444,7 @@ export default function NewProductForm() {
                                                 folder="products"
                                                 maxSizeMB={5}
                                             />
-                                            {isInvalid && (
-                                                <FieldError errors={field.state.meta.errors}/>
-                                            )}
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                         </Field>
                                     )
                                 }}
@@ -454,15 +457,12 @@ export default function NewProductForm() {
                         <div className="space-y-3">
                             <Label className="text-sm font-medium">Organization</Label>
 
-                            {/* Category */}
                             <form.Field name="categoryId">
                                 {(field) => {
-                                    const isInvalid =
-                                        field.state.meta.isTouched && !field.state.meta.isValid
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                     return (
                                         <Field data-invalid={isInvalid}>
-                                            <Label className="text-xs text-muted-foreground">Category
-                                                *</Label>
+                                            <Label className="text-xs text-muted-foreground">Category *</Label>
                                             <Select
                                                 value={field.state.value ? field.state.value.toString() : undefined}
                                                 onValueChange={(value) => {
@@ -477,30 +477,24 @@ export default function NewProductForm() {
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {categories.map((cat) => (
-                                                        <SelectItem key={cat.id}
-                                                                    value={cat.id.toString()}>
+                                                        <SelectItem key={cat.id} value={cat.id.toString()}>
                                                             {cat.name}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            {isInvalid && (
-                                                <FieldError errors={field.state.meta.errors}/>
-                                            )}
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                         </Field>
                                     )
                                 }}
                             </form.Field>
 
-                            {/* Subcategory */}
                             <form.Field name="subCategoryId">
                                 {(field) => {
-                                    const isInvalid =
-                                        field.state.meta.isTouched && !field.state.meta.isValid
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
                                     return (
                                         <Field data-invalid={isInvalid}>
-                                            <Label
-                                                className="text-xs text-muted-foreground">Subcategory</Label>
+                                            <Label className="text-xs text-muted-foreground">Subcategory</Label>
                                             <Select
                                                 value={field.state.value?.toString() || "none"}
                                                 onValueChange={(value) => {
@@ -514,16 +508,13 @@ export default function NewProductForm() {
                                                 <SelectContent>
                                                     <SelectItem value="none">None</SelectItem>
                                                     {subCategories.map((subCat) => (
-                                                        <SelectItem key={subCat.id}
-                                                                    value={subCat.id.toString()}>
+                                                        <SelectItem key={subCat.id} value={subCat.id.toString()}>
                                                             {subCat.name}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            {isInvalid && (
-                                                <FieldError errors={field.state.meta.errors}/>
-                                            )}
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
                                         </Field>
                                     )
                                 }}

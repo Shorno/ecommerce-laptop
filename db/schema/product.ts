@@ -1,4 +1,4 @@
-import {integer, pgTable, serial, varchar, boolean, decimal} from "drizzle-orm/pg-core";
+import {integer, pgTable, serial, varchar, boolean, decimal, text} from "drizzle-orm/pg-core";
 import {timestamps} from "@/db/schema/columns.helpers";
 import {relations} from "drizzle-orm";
 import {category, subCategory} from "./category";
@@ -23,6 +23,10 @@ export const product = pgTable("product", {
 
     inStock: boolean("in_stock").default(true).notNull(),
     isFeatured: boolean("is_featured").default(false).notNull(),
+
+    keyFeatures: text("key_features"),
+    description: text("description"),
+    specifications: text("specifications"),
 
     ...timestamps
 });

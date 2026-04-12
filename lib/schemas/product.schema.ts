@@ -45,6 +45,9 @@ export const createProductSchema = z.object({
         .default([]),
     inStock: z.boolean().default(true),
     isFeatured: z.boolean().default(false),
+    keyFeatures: z.string().optional().default(""),
+    description: z.string().optional().default(""),
+    specifications: z.string().optional().default(""),
 })
 
 export const updateProductSchema = createProductSchema.extend({

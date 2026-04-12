@@ -13,9 +13,10 @@ import {
 import {Badge} from "@/components/ui/badge"
 import {Product, ProductImage} from "@/db/schema/product"
 import {Category, SubCategory} from "@/db/schema/category"
-import EditProductDialog from "./edit-product-dialog"
 import DeleteProductDialog from "./delete-product-dialog"
 import { useTranslations } from "next-intl"
+import Link from "next/link"
+import {Pencil} from "lucide-react"
 
 export interface ProductWithRelations extends Product {
     images: ProductImage[]
@@ -174,7 +175,12 @@ export function useProductColumns() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <EditProductDialog product={product}/>
+                                <Link href={`/admin/dashboard/products/edit/${product.id}`}>
+                                    <Button variant="ghost" size="sm" className="w-full justify-start">
+                                        <Pencil className="h-4 w-4 mr-2"/>
+                                        Edit
+                                    </Button>
+                                </Link>
                                 <DeleteProductDialog
                                     productId={product.id}
                                     productName={product.name}

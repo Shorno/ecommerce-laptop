@@ -94,6 +94,9 @@ export default async function updateProduct(
                 ...updatedProduct[0],
                 additionalImages,
                 subCategoryId: updatedProduct[0].subCategoryId ?? undefined,
+                keyFeatures: updatedProduct[0].keyFeatures ?? "",
+                description: updatedProduct[0].description ?? "",
+                specifications: updatedProduct[0].specifications ?? "",
             },
             message: "Product updated successfully",
         }
