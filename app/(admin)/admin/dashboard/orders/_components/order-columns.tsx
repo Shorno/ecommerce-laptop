@@ -1,31 +1,26 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, Eye, MoreHorizontal } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuTrigger,
-    DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { Order } from "@/db/schema/order"
 import { OrderItem } from "@/db/schema/order"
-import { Payment } from "@/db/schema/payment"
-import ViewOrderDialog from "./view-order-dialog"
 import UpdateOrderStatusDialog from "./update-order-status-dialog"
 import DeleteOrderDialog from "./delete-order-dialog"
-import VerifyPaymentDialog from "./verify-payment-dialog"
 import { useTranslations } from "next-intl"
 
 export interface OrderWithDetails extends Order {
     items: OrderItem[]
-    payment: Payment | null
     itemCount: number
-    paymentMethod: string | null
-    paymentStatus: string | null
 }
 
 const statusVariants = {
@@ -37,18 +32,6 @@ const statusVariants = {
     cancelled: "destructive",
     refunded: "outline",
 } as const
-
-const paymentStatusVariants = {
-    pending: "secondary",
-    processing: "secondary",
-    completed: "default",
-    failed: "destructive",
-    refunded: "outline",
-    partially_refunded: "outline",
-    cancelled: "destructive",
-} as const
-
-
 
 export function useOrderColumns() {
     const t = useTranslations('orders');
@@ -69,9 +52,19 @@ export function useOrderColumns() {
                     </div>
                 )
             },
-            cell: ({ row }) => (
-                <div className="font-medium text-center">{row.getValue("orderNumber")}</div>
-            ),
+            cell: ({ row }) => {
+                const order = row.original
+                return (
+                    <div className="text-center">
+                        <Link
+                            href={`/admin/dashboard/orders/${order.id}`}
+                            className="font-medium text-primary hover:underline"
+                        >
+                            {order.orderNumber}
+                        </Link>
+                    </div>
+                )
+            },
         },
         {
             accessorKey: "customerFullName",
@@ -132,29 +125,6 @@ export function useOrderColumns() {
             },
         },
         {
-            accessorKey: "paymentMethod",
-            header: () => <div className="text-center">{t('payment')}</div>,
-            cell: ({ row }) => {
-                const order = row.original
-                const paymentStatus = order.paymentStatus as keyof typeof paymentStatusVariants | null
-                return (
-                    <div className="text-center">
-                        <div className="text-sm font-medium">
-                            {order.paymentMethod || "N/A"}
-                        </div>
-                        {paymentStatus && (
-                            <Badge
-                                variant={paymentStatusVariants[paymentStatus] || "secondary"}
-                                className="mt-1"
-                            >
-                                {t(`paymentStatus.${paymentStatus}`)}
-                            </Badge>
-                        )}
-                    </div>
-                )
-            },
-        },
-        {
             accessorKey: "createdAt",
             header: ({ column }) => {
                 return (
@@ -199,14 +169,17 @@ export function useOrderColumns() {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <ViewOrderDialog order={order} />
+                                <DropdownMenuItem asChild>
+                                    <Link href={`/admin/dashboard/orders/${order.id}`}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View Details
+                                    </Link>
+                                </DropdownMenuItem>
                                 <UpdateOrderStatusDialog order={order} />
                                 <DeleteOrderDialog
                                     orderId={order.id}
                                     orderNumber={order.orderNumber}
                                 />
-                                <DropdownMenuSeparator />
-                                <VerifyPaymentDialog order={order} />
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>

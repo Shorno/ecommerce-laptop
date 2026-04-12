@@ -9,7 +9,6 @@ export async function getOrders() {
         const orders = await db.query.order.findMany({
             with: {
                 items: true,
-                payment: true,
             },
             orderBy: desc(order.createdAt),
         })
@@ -17,8 +16,6 @@ export async function getOrders() {
         return orders.map(order => ({
             ...order,
             itemCount: order.items.length,
-            paymentMethod: order.payment?.paymentMethod ?? null,
-            paymentStatus: order.payment?.status ?? null,
         }))
     } catch (error) {
         console.error("Error fetching orders:", error)

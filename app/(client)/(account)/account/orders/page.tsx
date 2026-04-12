@@ -9,8 +9,13 @@ export const metadata: Metadata = {
 
 export default function OrdersPage() {
     return (
-        <div>
-            <h2 className="text-2xl font-semibold mb-6">My Orders</h2>
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-2xl font-bold text-foreground">My Orders</h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                    Track, manage, and review your past orders.
+                </p>
+            </div>
             <OrdersContent />
         </div>
     )

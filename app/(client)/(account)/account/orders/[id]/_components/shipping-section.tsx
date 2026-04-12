@@ -1,5 +1,4 @@
 import { MapPin } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { OrderData } from "@/lib/types/order"
 
 interface ShippingSectionProps {
@@ -8,19 +7,17 @@ interface ShippingSectionProps {
 
 export default function ShippingSection({ order }: ShippingSectionProps) {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 border-b border-border bg-muted/30">
+                <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
                     Shipping Address
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <address className="text-xs sm:text-sm not-italic space-y-1">
-                    <p className="font-medium">{order.customerFullName}</p>
-                    <p className="text-muted-foreground break-words">
-                        {order.shippingAddressLine}
-                    </p>
+                </h2>
+            </div>
+            <div className="p-4 sm:px-6 sm:py-5">
+                <address className="text-sm not-italic space-y-1">
+                    <p className="font-medium text-foreground">{order.customerFullName}</p>
+                    <p className="text-muted-foreground break-words">{order.shippingAddressLine}</p>
                     <p className="text-muted-foreground">
                         {order.shippingArea && `${order.shippingArea}, `}
                         {order.shippingCity}
@@ -29,7 +26,7 @@ export default function ShippingSection({ order }: ShippingSectionProps) {
                         {order.shippingPostalCode}, {order.shippingCountry}
                     </p>
                 </address>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     )
 }

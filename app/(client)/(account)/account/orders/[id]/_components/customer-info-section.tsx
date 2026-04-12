@@ -1,5 +1,4 @@
 import { User, Mail, Phone } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { OrderData } from "@/lib/types/order"
 
 interface CustomerInfoSectionProps {
@@ -8,33 +7,33 @@ interface CustomerInfoSectionProps {
 
 export default function CustomerInfoSection({ order }: CustomerInfoSectionProps) {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                    <User className="h-4 w-4 sm:h-5 sm:w-5" />
-                    Customer Details
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-                <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium break-all">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 border-b border-border bg-muted/30">
+                <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    Customer
+                </h2>
+            </div>
+            <div className="p-4 sm:px-6 sm:py-5 space-y-2.5">
+                <div className="flex items-center gap-2.5">
+                    <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-sm font-medium text-foreground truncate">
                         {order.customerFullName}
                     </span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-xs sm:text-sm break-all">
+                <div className="flex items-center gap-2.5">
+                    <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-muted-foreground truncate">
                         {order.customerEmail}
                     </span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="text-xs sm:text-sm">
+                <div className="flex items-center gap-2.5">
+                    <Phone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-muted-foreground">
                         {order.customerPhone}
                     </span>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     )
 }

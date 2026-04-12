@@ -49,11 +49,20 @@ export default function ChangePasswordPage() {
         onSubmit: async ({ value }) => {
             setIsSubmitting(true)
             try {
-                await authClient.changePassword({
+                const { error } = await authClient.changePassword({
                     currentPassword: value.currentPassword,
                     newPassword: value.newPassword,
                     revokeOtherSessions: false,
                 })
+
+                if (error) {
+                    toast.error("Error", {
+                        description: error.code === "INVALID_PASSWORD"
+                            ? "Current password is incorrect"
+                            : error.message || "Failed to change password",
+                    })
+                    return
+                }
 
                 toast.success("Password updated", {
                     description: "Your password has been changed successfully.",
@@ -61,12 +70,9 @@ export default function ChangePasswordPage() {
                 })
 
                 form.reset()
-            } catch (error: unknown) {
-                const message = error instanceof Error ? error.message : "Failed to change password"
+            } catch {
                 toast.error("Error", {
-                    description: message.includes("INVALID_PASSWORD")
-                        ? "Current password is incorrect"
-                        : message,
+                    description: "An unexpected error occurred. Please try again.",
                 })
             } finally {
                 setIsSubmitting(false)
@@ -75,11 +81,13 @@ export default function ChangePasswordPage() {
     })
 
     return (
-        <div>
-            <h2 className="text-2xl font-semibold mb-2">Change Password</h2>
-            <p className="text-muted-foreground text-sm mb-6">
-                Update your password to keep your account secure.
-            </p>
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-2xl font-bold text-foreground">Change Password</h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                    Update your password to keep your account secure.
+                </p>
+            </div>
 
             <form
                 onSubmit={(e) => {
