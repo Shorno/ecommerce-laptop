@@ -29,6 +29,20 @@
       "when": 1776026936295,
       "tag": "0003_bizarre_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776029944628,
+      "tag": "0004_variant_system",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776031261018,
+      "tag": "0005_fix_variant_timestamps",
+      "breakpoints": true
     }
   ]
 }

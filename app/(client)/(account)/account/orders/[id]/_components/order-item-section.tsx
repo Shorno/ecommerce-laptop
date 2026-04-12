@@ -7,7 +7,7 @@ interface OrderItem {
     id: number
     productImage: string | null
     productName: string
-    productSize: string
+    variantLabel: string
     quantity: number
     unitPrice: string
     subtotal: string
@@ -53,7 +53,7 @@ export default function OrderItemsSection({ items }: OrderItemsSectionProps) {
                                 {item.productName}
                             </p>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                                Variant: {item.productSize}
+                                Variant: {item.variantLabel}
                             </p>
 
                             {/* Mobile: price row below */}

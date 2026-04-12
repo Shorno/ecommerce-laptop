@@ -13,11 +13,8 @@ export async function getCategoriesWithProducts(limit: number = 4) {
     const categoriesWithProducts = await Promise.all(
         categories.map(async (cat) => {
             const products = await db.query.product.findMany({
-                where: (product, { eq, and }) =>
-                    and(
-                        eq(product.categoryId, cat.id),
-                        eq(product.inStock, true)
-                    ),
+                where: (product, { eq }) =>
+                    eq(product.categoryId, cat.id),
                 with: {
                     category: {
                         columns: {
@@ -25,6 +22,7 @@ export async function getCategoriesWithProducts(limit: number = 4) {
                             slug: true
                         },
                     },
+                    variants: true,
                 },
                 limit: limit,
                 orderBy: (product, { desc }) => [desc(product.createdAt)],

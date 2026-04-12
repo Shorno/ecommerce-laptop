@@ -3,11 +3,8 @@ import { ProductCard } from "@/components/client/product/product-card";
 
 export default async function FeaturedProducts() {
     const products = await db.query.product.findMany({
-        where: (product, { eq, and }) =>
-            and(
-                eq(product.isFeatured, true),
-                eq(product.inStock, true)
-            ),
+        where: (product, { eq }) =>
+            eq(product.isFeatured, true),
         with: {
             category: {
                 columns: {
@@ -15,6 +12,7 @@ export default async function FeaturedProducts() {
                     slug: true,
                 },
             },
+            variants: true,
         },
         limit: 8,
         orderBy: (product, { desc }) => [desc(product.createdAt)],

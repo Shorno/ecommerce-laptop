@@ -7,7 +7,7 @@ import Link from "next/link"
 import {formatPrice} from "@/utils/currency"
 import getProductBySlug from "@/app/actions/products/get-product-by-slug"
 import {ProductImageGallery} from "@/components/client/product/product-image-gallery"
-import {ProductDetailsActions} from "@/components/client/product/product-details-actions"
+import {ProductPageClient} from "@/components/client/product/product-page-client"
 import type {Metadata} from "next"
 import {db} from "@/db/config"
 import RichTextDisplay from "@/components/ui/rich-text-display"
@@ -28,29 +28,21 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({params}: ProductDetailsPageProps): Promise<Metadata> {
     const {slug} = await params
-
     const product = await getProductBySlug(slug)
 
     if (!product) {
-        return {
-            title: 'Product Not Found'
-        }
+        return {title: 'Product Not Found'}
     }
+
+    const displayPrice = product.minPrice ? formatPrice(product.minPrice) : "Price varies"
 
     return {
         title: product.name,
-        description: `${product.name} - ${product.category.name}. Price: ${formatPrice(product.price)}`,
+        description: `${product.name} - ${product.category.name}. ${displayPrice}`,
         openGraph: {
             title: product.name,
-            description: `${product.name} - ${product.category.name}. Price: ${formatPrice(product.price)}`,
-            images: [
-                {
-                    url: product.image,
-                    width: 1200,
-                    height: 630,
-                    alt: product.name,
-                }
-            ],
+            description: `${product.name} - ${product.category.name}. ${displayPrice}`,
+            images: [{url: product.image, width: 1200, height: 630, alt: product.name}],
             type: 'website',
         },
         twitter: {
@@ -62,15 +54,14 @@ export async function generateMetadata({params}: ProductDetailsPageProps): Promi
     }
 }
 
-// Parse key features from line-separated input
+// Parse key features
 function parseKeyFeatures(raw: string | null): { label: string; value: string }[] {
     if (!raw) return []
     try {
         const parsed = JSON.parse(raw)
-        if (Array.isArray(parsed)) return parsed.filter((f: {label: string; value: string}) => f.label || f.value)
+        if (Array.isArray(parsed)) return parsed.filter((f: { label: string; value: string }) => f.label || f.value)
         return []
     } catch {
-        // Fallback: legacy line-separated format
         return raw
             .split("\n")
             .map(line => line.trim())
@@ -78,26 +69,15 @@ function parseKeyFeatures(raw: string | null): { label: string; value: string }[
             .map(line => {
                 const colonIndex = line.indexOf(":")
                 if (colonIndex > 0) {
-                    return {
-                        label: line.substring(0, colonIndex).trim(),
-                        value: line.substring(colonIndex + 1).trim(),
-                    }
+                    return {label: line.substring(0, colonIndex).trim(), value: line.substring(colonIndex + 1).trim()}
                 }
                 return {label: "", value: line}
             })
     }
 }
 
-// Parse specifications from JSON string
-interface SpecItem {
-    label: string
-    value: string
-}
-
-interface SpecGroup {
-    group: string
-    specs: SpecItem[]
-}
+interface SpecItem { label: string; value: string }
+interface SpecGroup { group: string; specs: SpecItem[] }
 
 function parseSpecifications(raw: string | null): SpecGroup[] {
     if (!raw) return []
@@ -113,7 +93,6 @@ function parseSpecifications(raw: string | null): SpecGroup[] {
 
 export default async function ProductDetailsPage({params}: ProductDetailsPageProps) {
     const {slug} = await params
-
     const product = await getProductBySlug(slug)
 
     if (!product) {
@@ -125,6 +104,24 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
     const hasDescription = !!product.description && product.description !== "<p></p>"
     const hasSpecifications = specifications.length > 0 && specifications.some(g => g.specs.length > 0)
     const hasBottomContent = hasDescription || hasSpecifications
+
+    // Parse options for variant selector
+    const parsedOptions = (product.options || []).map(o => ({
+        name: o.name,
+        values: (() => { try { return JSON.parse(o.values) as string[] } catch { return [] } })(),
+    }))
+
+    const parsedVariants = (product.variants || []).map(v => ({
+        id: v.id,
+        price: v.price,
+        stock: v.stock,
+        inStock: v.inStock,
+        optionValues: v.optionValues
+            ? (() => { try { return JSON.parse(v.optionValues) as Record<string, string> } catch { return null } })()
+            : null,
+    }))
+
+    const hasMultipleVariants = parsedVariants.length > 1
 
     return (
         <div className="container mx-auto max-w-[1400px] px-4 md:px-6 py-4 md:py-6">
@@ -160,15 +157,6 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                         {product.isFeatured && (
                             <Badge className="text-xs bg-tech-accent text-white border-0">Featured</Badge>
                         )}
-                        {product.inStock ? (
-                            <Badge variant="outline" className="text-xs text-green-600 border-green-600">
-                                In Stock
-                            </Badge>
-                        ) : (
-                            <Badge variant="destructive" className="text-xs">
-                                Out of Stock
-                            </Badge>
-                        )}
                     </div>
 
                     {/* Product Name */}
@@ -181,13 +169,6 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                                 {product.subCategory.name}
                             </p>
                         )}
-                    </div>
-
-                    {/* Price */}
-                    <div className="bg-muted/50 rounded-lg px-4 py-3">
-                        <p className="text-2xl md:text-3xl font-bold text-tech-accent">
-                            {formatPrice(product.price)}
-                        </p>
                     </div>
 
                     {/* Key Features */}
@@ -223,23 +204,15 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
 
                     <Separator/>
 
-                    {/* Product Quick Info */}
-                    <div className="bg-card border border-border rounded-lg p-4 space-y-2.5">
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-muted-foreground">Size / Variant</span>
-                            <span className="font-medium">{product.size}</span>
-                        </div>
-                        <Separator/>
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-muted-foreground">Stock Quantity</span>
-                            <span className="font-medium">
-                                {product.stockQuantity > 0 ? product.stockQuantity : "Out of stock"}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <ProductDetailsActions product={product}/>
+                    {/* Client-side: Price/Variant Selector/Actions */}
+                    <ProductPageClient
+                        productId={product.id}
+                        productName={product.name}
+                        productImage={product.image}
+                        options={parsedOptions}
+                        variants={parsedVariants}
+                        isFeatured={product.isFeatured}
+                    />
                 </div>
             </div>
 
@@ -249,44 +222,35 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                     <Tabs defaultValue={hasDescription ? "description" : "specification"} className="w-full">
                         <TabsList className="w-full grid h-auto p-0 bg-transparent rounded-none gap-0" style={{gridTemplateColumns: `repeat(${[hasDescription, hasSpecifications].filter(Boolean).length}, 1fr)`}}>
                             {hasDescription && (
-                                <TabsTrigger
-                                    value="description"
+                                <TabsTrigger value="description"
                                     className="rounded-none border border-border py-3 text-sm font-semibold
                                         data-[state=active]:border-tech-accent data-[state=active]:text-tech-accent data-[state=active]:bg-tech-accent/5 data-[state=active]:shadow-none
-                                        data-[state=inactive]:bg-transparent data-[state=inactive]:text-muted-foreground"
-                                >
+                                        data-[state=inactive]:bg-transparent data-[state=inactive]:text-muted-foreground">
                                     Description
                                 </TabsTrigger>
                             )}
                             {hasSpecifications && (
-                                <TabsTrigger
-                                    value="specification"
+                                <TabsTrigger value="specification"
                                     className="rounded-none border border-border py-3 text-sm font-semibold
                                         data-[state=active]:border-tech-accent data-[state=active]:text-tech-accent data-[state=active]:bg-tech-accent/5 data-[state=active]:shadow-none
-                                        data-[state=inactive]:bg-transparent data-[state=inactive]:text-muted-foreground"
-                                >
+                                        data-[state=inactive]:bg-transparent data-[state=inactive]:text-muted-foreground">
                                     Specification
                                 </TabsTrigger>
                             )}
                         </TabsList>
 
-                        {/* Description Tab */}
                         {hasDescription && (
                             <TabsContent value="description" className="mt-6">
                                 <div className="max-w-4xl">
-                                    <RichTextDisplay
-                                        html={product.description!}
+                                    <RichTextDisplay html={product.description!}
                                         className="prose prose-sm dark:prose-invert max-w-none text-foreground
                                             prose-headings:text-foreground prose-headings:font-semibold
                                             prose-p:text-muted-foreground prose-p:leading-relaxed
-                                            prose-li:text-muted-foreground
-                                            prose-strong:text-foreground"
-                                    />
+                                            prose-li:text-muted-foreground prose-strong:text-foreground"/>
                                 </div>
                             </TabsContent>
                         )}
 
-                        {/* Specification Tab */}
                         {hasSpecifications && (
                             <TabsContent value="specification" className="mt-6">
                                 <div className="max-w-4xl space-y-6">
@@ -299,18 +263,12 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                                             )}
                                             <div className={`border border-border overflow-hidden ${group.group ? "rounded-b-lg" : "rounded-lg"}`}>
                                                 {group.specs.map((spec, specIndex) => (
-                                                    <div
-                                                        key={specIndex}
-                                                        className={`grid grid-cols-[200px_1fr] text-sm ${
-                                                            specIndex % 2 === 0 ? "bg-card" : "bg-muted/20"
-                                                        } ${specIndex < group.specs.length - 1 ? "border-b border-border" : ""}`}
-                                                    >
-                                                        <div className="px-4 py-2.5 text-muted-foreground font-medium border-r border-border">
-                                                            {spec.label}
-                                                        </div>
-                                                        <div className="px-4 py-2.5 text-foreground">
-                                                            {spec.value}
-                                                        </div>
+                                                    <div key={specIndex}
+                                                         className={`grid grid-cols-[200px_1fr] text-sm ${
+                                                             specIndex % 2 === 0 ? "bg-card" : "bg-muted/20"
+                                                         } ${specIndex < group.specs.length - 1 ? "border-b border-border" : ""}`}>
+                                                        <div className="px-4 py-2.5 text-muted-foreground font-medium border-r border-border">{spec.label}</div>
+                                                        <div className="px-4 py-2.5 text-foreground">{spec.value}</div>
                                                     </div>
                                                 ))}
                                             </div>

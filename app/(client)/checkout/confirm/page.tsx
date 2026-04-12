@@ -143,7 +143,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                                         <div className="flex-1 min-w-0">
                                             <h4 className="text-sm font-medium line-clamp-2">{item.productName}</h4>
                                             <p className="text-xs text-muted-foreground mt-0.5">
-                                                {item.productSize && <span>{item.productSize}</span>}
+                                                {item.variantLabel && <span>{item.variantLabel}</span>}
                                             </p>
                                             <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                                         </div>

@@ -40,14 +40,14 @@ export default function CartItem({item}: CartItemProps) {
 
             <div className="flex-1 min-w-0 space-y-2">
                 <h3 className="text-sm font-semibold line-clamp-2">
-                    {item.name} <span className="text-muted-foreground font-normal">({item.size})</span>
+                    {item.name} <span className="text-muted-foreground font-normal">({item.variantLabel})</span>
                 </h3>
 
 
                 <div className="flex items-center gap-3">
                     <div className="flex items-center border rounded-lg bg-muted/50">
                         <Button
-                            onClick={() => decrement(item.id, isAuthenticated)}
+                            onClick={() => decrement(item.id, item.variantId, isAuthenticated)}
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0 rounded-l-lg rounded-r-none"
@@ -62,7 +62,7 @@ export default function CartItem({item}: CartItemProps) {
                         </div>
 
                         <Button
-                            onClick={() => increment(item.id, isAuthenticated)}
+                            onClick={() => increment(item.id, item.variantId, isAuthenticated)}
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0 rounded-r-lg rounded-l-none"
@@ -75,7 +75,7 @@ export default function CartItem({item}: CartItemProps) {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                        onClick={() => removeItem(item.id, isAuthenticated)}
+                        onClick={() => removeItem(item.id, item.variantId, isAuthenticated)}
                     >
                         <Trash2 className="h-4 w-4"/>
                     </Button>

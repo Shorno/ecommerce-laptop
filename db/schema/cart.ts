@@ -1,6 +1,6 @@
 import {decimal, integer, pgTable, serial, timestamp, varchar} from "drizzle-orm/pg-core"
 import { timestamps } from "./columns.helpers";
-import {product} from "@/db/schema/product";
+import {product, productVariant} from "@/db/schema/product";
 import { relations } from "drizzle-orm";
 
 
@@ -19,6 +19,9 @@ export const cartItem = pgTable("cart_item", {
     productId: integer("product_id")
         .notNull()
         .references(() => product.id, { onDelete: "cascade" }),
+    variantId: integer("variant_id")
+        .notNull()
+        .references(() => productVariant.id, { onDelete: "cascade" }),
     quantity: integer("quantity").notNull().default(1),
     priceAtAdd: decimal("price_at_add", { precision: 10, scale: 2 }).notNull(),
     ...timestamps
@@ -36,5 +39,9 @@ export const cartItemRelations = relations(cartItem, ({ one }) => ({
     product: one(product, {
         fields: [cartItem.productId],
         references: [product.id],
+    }),
+    variant: one(productVariant, {
+        fields: [cartItem.variantId],
+        references: [productVariant.id],
     }),
 }));

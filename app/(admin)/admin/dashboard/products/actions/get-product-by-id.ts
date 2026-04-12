@@ -11,6 +11,8 @@ export default async function getProductById(id: number) {
             category: true,
             subCategory: true,
             images: true,
+            options: true,
+            variants: true,
         }
     })
 }

@@ -20,9 +20,7 @@ type SearchResult = {
     name: string;
     slug: string;
     image: string;
-    price: string;
-    size: string;
-    inStock: boolean;
+    minPrice: string | null;
     category: {
         name: string;
         slug: string;
@@ -113,11 +111,7 @@ export default function SearchModal({open, onOpenChange}: SearchModalProps) {
                                         <h4 className="font-medium truncate">{product.name}</h4>
                                         <p className="text-sm text-muted-foreground">{product.category.name}</p>
                                         <div className="flex items-center gap-2 mt-1">
-                                            <span className="font-semibold">৳{product.price}</span>
-                                            <span className="text-xs text-muted-foreground">• {product.size}</span>
-                                            {!product.inStock && (
-                                                <span className="text-xs text-red-500">• Out of Stock</span>
-                                            )}
+                                            <span className="font-semibold">{product.minPrice ? `৳${product.minPrice}` : 'Price TBD'}</span>
                                         </div>
                                     </div>
                                 </button>
