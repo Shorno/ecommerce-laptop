@@ -1,15 +1,19 @@
 "use client"
 
-import {Plus, Trash2, X} from "lucide-react"
+import {Plus, Trash2, X, DollarSign} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Badge} from "@/components/ui/badge"
+import {Switch} from "@/components/ui/switch"
+import {Label} from "@/components/ui/label"
 import {useState} from "react"
 
 export interface ProductOptionData {
     name: string
     values: string[]
     position: number
+    /** If true (default), this option creates different price points. If false, all values share the same price. */
+    affectsPrice: boolean
 }
 
 interface ProductOptionBuilderProps {
@@ -23,7 +27,7 @@ export default function ProductOptionBuilder({value, onChange, maxOptions = 3}: 
 
     const addOption = () => {
         if (value.length >= maxOptions) return
-        onChange([...value, {name: "", values: [], position: value.length}])
+        onChange([...value, {name: "", values: [], position: value.length, affectsPrice: true}])
     }
 
     const removeOption = (index: number) => {
@@ -33,6 +37,12 @@ export default function ProductOptionBuilder({value, onChange, maxOptions = 3}: 
     const updateOptionName = (index: number, name: string) => {
         const updated = [...value]
         updated[index] = {...updated[index], name}
+        onChange(updated)
+    }
+
+    const toggleAffectsPrice = (index: number, checked: boolean) => {
+        const updated = [...value]
+        updated[index] = {...updated[index], affectsPrice: checked}
         onChange(updated)
     }
 
@@ -86,6 +96,28 @@ export default function ProductOptionBuilder({value, onChange, maxOptions = 3}: 
                         >
                             <Trash2 className="w-4 h-4"/>
                         </Button>
+                    </div>
+
+                    {/* Affects pricing toggle */}
+                    <div className="flex items-center justify-between px-1">
+                        <div className="flex items-center gap-2">
+                            <DollarSign className={`h-3.5 w-3.5 ${option.affectsPrice ? "text-green-600" : "text-muted-foreground"}`}/>
+                            <Label className="text-xs cursor-pointer select-none" htmlFor={`affects-price-${optionIndex}`}>
+                                Affects pricing
+                            </Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {!option.affectsPrice && (
+                                <span className="text-[10px] text-muted-foreground">
+                                    All values share same price
+                                </span>
+                            )}
+                            <Switch
+                                id={`affects-price-${optionIndex}`}
+                                checked={option.affectsPrice}
+                                onCheckedChange={(checked) => toggleAffectsPrice(optionIndex, checked)}
+                            />
+                        </div>
                     </div>
 
                     {/* Existing values as badges */}

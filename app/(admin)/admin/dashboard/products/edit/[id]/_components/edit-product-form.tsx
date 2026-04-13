@@ -70,6 +70,7 @@ export default function EditProductForm({product}: EditProductFormProps) {
                 name: o.name,
                 values: (() => { try { return JSON.parse(o.values) } catch { return [] } })(),
                 position: o.position,
+                affectsPrice: true, // Default: all options affect price
             }))
     )
 
