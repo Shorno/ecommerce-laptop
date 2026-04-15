@@ -10,6 +10,7 @@ export default async function getProductById(id: number) {
         with: {
             category: true,
             subCategory: true,
+            brand: true,
             images: true,
             options: true,
             variants: true,

@@ -57,6 +57,7 @@ export default async function updateProduct(
                 .set({
                     ...updateData,
                     subCategoryId: updateData.subCategoryId || null,
+                    brandId: updateData.brandId || null,
                     minPrice: Math.min(...variants.map(v => parseFloat(v.price))).toString(),
                 })
                 .where(eq(product.id, id))

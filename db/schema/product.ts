@@ -2,6 +2,7 @@ import {integer, pgTable, serial, varchar, boolean, decimal, text} from "drizzle
 import {timestamps} from "@/db/schema/columns.helpers";
 import {relations} from "drizzle-orm";
 import {category, subCategory} from "./category";
+import {brand} from "./brand";
 
 export const product = pgTable("product", {
     id: serial("id").primaryKey(),
@@ -12,6 +13,8 @@ export const product = pgTable("product", {
         .references(() => category.id, {onDelete: "cascade"}),
     subCategoryId: integer("sub_category_id")
         .references(() => subCategory.id, {onDelete: "set null"}),
+    brandId: integer("brand_id")
+        .references(() => brand.id, {onDelete: "set null"}),
 
     image: varchar("image", {length: 255}).notNull(),
 
@@ -72,6 +75,10 @@ export const productRelations = relations(product, ({one, many}) => ({
         fields: [product.subCategoryId],
         references: [subCategory.id]
     }),
+    brand: one(brand, {
+        fields: [product.brandId],
+        references: [brand.id]
+    }),
     images: many(productImage),
     options: many(productOption),
     variants: many(productVariant),
@@ -113,6 +120,10 @@ export interface ProductWithRelations extends Product {
         slug: string;
     };
     subCategory?: {
+        name: string;
+    } | null;
+    brand?: {
+        id: number;
         name: string;
     } | null;
     images?: ProductImage[];

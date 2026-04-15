@@ -43,6 +43,9 @@ export const createProductSchema = z.object({
     subCategoryId: z
         .union([z.number().int().positive(), z.undefined()])
         .optional(),
+    brandId: z
+        .union([z.number().int().positive(), z.null(), z.undefined()])
+        .optional(),
     image: z
         .url("Please enter a valid image URL.")
         .max(255, "Image URL must be at most 255 characters."),

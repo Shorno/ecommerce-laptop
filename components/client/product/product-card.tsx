@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {formatPrice} from "@/utils/currency";
-import {Eye} from "lucide-react"
+import {Eye, Star} from "lucide-react"
 
 interface ProductCardProps {
     product: {
@@ -27,9 +27,13 @@ interface ProductCardProps {
             inStock: boolean
         }[]
     }
+    reviewStats?: {
+        averageRating: number
+        totalReviews: number
+    }
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, reviewStats }: ProductCardProps) {
     const variants = product.variants || []
     const hasVariants = variants.length > 0
     const allOutOfStock = hasVariants ? variants.every(v => !v.inStock || v.stock === 0) : true
@@ -89,6 +93,27 @@ export function ProductCard({ product }: ProductCardProps) {
                     <h3 className="text-xs sm:text-sm font-medium mb-1.5 line-clamp-2 text-foreground group-hover:text-tech-accent transition-colors leading-snug">
                         {product.name}
                     </h3>
+
+                    {/* Rating */}
+                    {reviewStats && reviewStats.totalReviews > 0 && (
+                        <div className="flex items-center gap-1 mb-1.5">
+                            <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                    <Star
+                                        key={s}
+                                        className={`h-3 w-3 ${
+                                            reviewStats.averageRating >= s
+                                                ? "fill-yellow-400 text-yellow-400"
+                                                : "fill-transparent text-muted-foreground/20"
+                                        }`}
+                                    />
+                                ))}
+                            </div>
+                            <span className="text-[11px] text-muted-foreground">
+                                ({reviewStats.totalReviews})
+                            </span>
+                        </div>
+                    )}
 
                     {/* Price */}
                     <div className="mb-2 mt-auto">

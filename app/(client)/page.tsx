@@ -55,8 +55,36 @@ function BrandSkeleton() {
 }
 
 export default function HomePage() {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                "name": "LaptopBD",
+                "url": siteUrl,
+                "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": `${siteUrl}/products?q={search_term_string}`,
+                    "query-input": "required name=search_term_string",
+                },
+            },
+            {
+                "@type": "Organization",
+                "name": "LaptopBD",
+                "url": siteUrl,
+                "logo": `${siteUrl}/icon.png`,
+            },
+        ],
+    }
+
     return (
         <div className="bg-tech-bg dark:bg-background min-h-screen">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{__html: JSON.stringify(jsonLd).replace(/</g, "\\u003c")}}
+            />
             {/* 1. Hero Carousel + Side Banners */}
             <FeaturedImages />
 

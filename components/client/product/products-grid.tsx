@@ -3,6 +3,7 @@ import { ProductCard } from "@/components/client/product/product-card"
 import { ProductsSort } from "@/components/client/product/products-sort"
 import { getActiveCategories } from "@/app/(client)/actions/get-active-categories"
 import { getSubCategoriesByCategory } from "@/app/(client)/actions/get-subcategories-by-category"
+import {getProductReviewStats} from "@/app/actions/reviews/review-stats"
 
 interface ProductsGridProps {
     searchParams: {
@@ -24,6 +25,8 @@ export async function ProductsGrid({ searchParams, categoryName }: ProductsGridP
     const subCategories = searchParams.category
         ? await getSubCategoriesByCategory(searchParams.category)
         : []
+
+    const reviewStatsMap = await getProductReviewStats(products.map(p => p.id))
 
     return (
         <div className="space-y-4">
@@ -57,7 +60,7 @@ export async function ProductsGrid({ searchParams, categoryName }: ProductsGridP
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                     {products.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                        <ProductCard key={product.id} product={product} reviewStats={reviewStatsMap[product.id]} />
                     ))}
                 </div>
             )}

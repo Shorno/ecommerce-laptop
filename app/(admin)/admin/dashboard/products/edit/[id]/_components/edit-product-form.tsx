@@ -28,6 +28,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import {useCategories, useSubCategories} from "@/hooks/use-categories"
+import {useBrands} from "@/hooks/use-brands"
 import {useMutation, useQueryClient} from "@tanstack/react-query"
 import {Separator} from "@/components/ui/separator"
 import {Label} from "@/components/ui/label"
@@ -44,6 +45,7 @@ interface EditProductFormProps {
         slug: string
         categoryId: number
         subCategoryId: number | null
+        brandId: number | null
         image: string
         isFeatured: boolean
         keyFeatures: string | null
@@ -52,6 +54,7 @@ interface EditProductFormProps {
         images: { id: number; imageUrl: string }[]
         category: { id: number; name: string; slug: string }
         subCategory: { id: number; name: string } | null
+        brand: { id: number; name: string } | null
         options: { id: number; name: string; position: number; values: string }[]
         variants: { id: number; sku: string | null; price: string; stock: number; inStock: boolean; optionValues: string | null; sortOrder: number }[]
     }
@@ -70,6 +73,7 @@ export default function EditProductForm({product}: EditProductFormProps) {
                 name: o.name,
                 values: (() => { try { return JSON.parse(o.values) } catch { return [] } })(),
                 position: o.position,
+                affectsPrice: true, // Default: all options affect price
             }))
     )
 
@@ -89,6 +93,7 @@ export default function EditProductForm({product}: EditProductFormProps) {
     )
 
     const {data: categories = []} = useCategories()
+    const {data: brands = []} = useBrands()
     const subCategories = useSubCategories(selectedCategory)
 
     const mutation = useMutation({
@@ -128,6 +133,7 @@ export default function EditProductForm({product}: EditProductFormProps) {
             slug: product.slug,
             categoryId: product.categoryId,
             subCategoryId: product.subCategoryId ?? undefined as number | undefined,
+            brandId: product.brandId ?? undefined as number | undefined,
             image: product.image,
             additionalImages: product.images?.map(img => img.imageUrl) || [] as string[],
             isFeatured: product.isFeatured,
@@ -417,6 +423,42 @@ export default function EditProductForm({product}: EditProductFormProps) {
                                                 <SelectContent>
                                                     <SelectItem value="none">None</SelectItem>
                                                     {subCategories.map((s) => (<SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>))}
+                                                </SelectContent>
+                                            </Select>
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
+                                        </Field>
+                                    )
+                                }}
+                            </form.Field>
+                        </div>
+
+                        <Separator/>
+
+                        {/* Brand */}
+                        <div className="space-y-3">
+                            <Label className="text-sm font-medium">Brand</Label>
+                            <form.Field name="brandId">
+                                {(field) => {
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                                    return (
+                                        <Field data-invalid={isInvalid}>
+                                            <Label className="text-xs text-muted-foreground">Select Brand</Label>
+                                            <Select
+                                                value={field.state.value?.toString() || "none"}
+                                                onValueChange={(value) => {
+                                                    field.handleChange(value === "none" ? undefined : parseInt(value))
+                                                }}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select brand"/>
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">None</SelectItem>
+                                                    {brands.map((b) => (
+                                                        <SelectItem key={b.id} value={b.id.toString()}>
+                                                            {b.name}
+                                                        </SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                             {isInvalid && <FieldError errors={field.state.meta.errors}/>}

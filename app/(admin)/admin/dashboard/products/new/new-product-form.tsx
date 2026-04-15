@@ -29,6 +29,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import {useCategories, useSubCategories} from "@/hooks/use-categories"
+import {useBrands} from "@/hooks/use-brands"
 import {useMutation, useQueryClient} from "@tanstack/react-query"
 import {Separator} from "@/components/ui/separator"
 import {Label} from "@/components/ui/label"
@@ -54,6 +55,7 @@ export default function NewProductForm() {
     }])
 
     const {data: categories = []} = useCategories()
+    const {data: brands = []} = useBrands()
     const subCategories = useSubCategories(selectedCategory)
 
     const mutation = useMutation({
@@ -89,6 +91,7 @@ export default function NewProductForm() {
             slug: "",
             categoryId: 0,
             subCategoryId: undefined as number | undefined,
+            brandId: undefined as number | undefined,
             image: "",
             additionalImages: [] as string[],
             isFeatured: false,
@@ -481,6 +484,42 @@ export default function NewProductForm() {
                                                     {subCategories.map((subCat) => (
                                                         <SelectItem key={subCat.id} value={subCat.id.toString()}>
                                                             {subCat.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {isInvalid && <FieldError errors={field.state.meta.errors}/>}
+                                        </Field>
+                                    )
+                                }}
+                            </form.Field>
+                        </div>
+
+                        <Separator/>
+
+                        {/* Brand */}
+                        <div className="space-y-3">
+                            <Label className="text-sm font-medium">Brand</Label>
+                            <form.Field name="brandId">
+                                {(field) => {
+                                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                                    return (
+                                        <Field data-invalid={isInvalid}>
+                                            <Label className="text-xs text-muted-foreground">Select Brand</Label>
+                                            <Select
+                                                value={field.state.value?.toString() || "none"}
+                                                onValueChange={(value) => {
+                                                    field.handleChange(value === "none" ? undefined : parseInt(value))
+                                                }}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select brand"/>
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">None</SelectItem>
+                                                    {brands.map((b) => (
+                                                        <SelectItem key={b.id} value={b.id.toString()}>
+                                                            {b.name}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
