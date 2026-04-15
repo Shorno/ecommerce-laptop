@@ -1,9 +1,13 @@
 import { ProductCard } from "./product-card"
 import getAllProducts from "@/app/actions/products/get-all-products";
+import {getProductReviewStats} from "@/app/actions/reviews/review-stats";
 
 
 export default async function ProductList() {
     const products = await getAllProducts()
+    const productIds = products.map(p => p.id)
+    const reviewStats = await getProductReviewStats(productIds)
+
     return (
         <div className="w-full">
             {/* Header Section */}
@@ -23,7 +27,11 @@ export default async function ProductList() {
                 <div className="mx-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                         {products.map((product) => (
-                            <ProductCard key={product.id} product={product} />
+                            <ProductCard 
+                                key={product.id} 
+                                product={product} 
+                                reviewStats={reviewStats[product.id]}
+                            />
                         ))}
                     </div>
                 </div>

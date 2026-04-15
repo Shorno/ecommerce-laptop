@@ -54,6 +54,7 @@ export default async function createProduct(
             const [newProduct] = await tx.insert(product).values({
                 ...productData,
                 subCategoryId: productData.subCategoryId || null,
+                brandId: productData.brandId || null,
                 minPrice: Math.min(...variants.map(v => parseFloat(v.price))).toString(),
             }).returning()
 

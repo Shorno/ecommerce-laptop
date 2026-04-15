@@ -1,6 +1,6 @@
 "use client"
 
-import {useState, useCallback} from "react"
+import {useState, useCallback, useEffect} from "react"
 import {Input} from "@/components/ui/input"
 import {Button} from "@/components/ui/button"
 import {Switch} from "@/components/ui/switch"
@@ -180,15 +180,20 @@ export default function VariantTableBuilder({value, onChange, options}: VariantT
     const overriddenCount = value.filter(v => v.priceOverridden).length
 
     // If no variants exist, add a default one
+    useEffect(() => {
+        if (value.length === 0) {
+            onChange([{
+                sku: "",
+                price: basePrice,
+                stock: baseStock,
+                inStock: true,
+                optionValues: {},
+                priceOverridden: false,
+            }])
+        }
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
     if (value.length === 0) {
-        onChange([{
-            sku: "",
-            price: basePrice,
-            stock: baseStock,
-            inStock: true,
-            optionValues: {},
-            priceOverridden: false,
-        }])
         return null
     }
 

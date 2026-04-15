@@ -38,7 +38,7 @@ export function SiteHeader() {
 
     return (
         <header
-            className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+            className="flex h-(--header-height) shrink-0 items-center gap-2 border-b border-border/60 bg-background/80 backdrop-blur-sm transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
             <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
                 <SidebarTrigger className="-ml-1"/>
                 <Separator
@@ -51,7 +51,7 @@ export function SiteHeader() {
                         <BreadcrumbList>
                             <BreadcrumbItem>
                                 <BreadcrumbLink asChild>
-                                    <Link href="/admin/dashboard">Dashboard</Link>
+                                    <Link href="/admin/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                             {breadcrumbSegments.map((segment, index) => {
@@ -64,10 +64,10 @@ export function SiteHeader() {
                                         <BreadcrumbSeparator />
                                         <BreadcrumbItem>
                                             {isLast ? (
-                                                <BreadcrumbPage>{label}</BreadcrumbPage>
+                                                <BreadcrumbPage className="font-medium">{label}</BreadcrumbPage>
                                             ) : (
                                                 <BreadcrumbLink asChild>
-                                                    <Link href={href}>{label}</Link>
+                                                    <Link href={href} className="text-muted-foreground hover:text-foreground transition-colors">{label}</Link>
                                                 </BreadcrumbLink>
                                             )}
                                         </BreadcrumbItem>
@@ -77,18 +77,18 @@ export function SiteHeader() {
                         </BreadcrumbList>
                     </Breadcrumb>
                 ) : (
-                    <h1 className="text-base font-medium">Dashboard</h1>
+                    <h1 className="text-sm font-semibold tracking-tight">Dashboard</h1>
                 )}
 
                 <div className="ml-auto flex items-center gap-2">
                     <Button
-                        variant="destructive"
+                        variant="ghost"
                         size="sm"
-                        className="hidden sm:flex cursor-pointer"
+                        className="hidden sm:flex text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-200 cursor-pointer"
                         onClick={handleLogOut}
                     >
-                        <LogOutIcon/>
-                        <span>Logout</span>
+                        <LogOutIcon size={16}/>
+                        <span className="text-xs font-medium">Logout</span>
                     </Button>
                     <LanguageSwitcher/>
                 </div>

@@ -2,7 +2,7 @@ import {notFound} from "next/navigation"
 import {Badge} from "@/components/ui/badge"
 import {Separator} from "@/components/ui/separator"
 import {Button} from "@/components/ui/button"
-import {ArrowLeft, Zap} from "lucide-react"
+import {ArrowLeft, Star, Zap} from "lucide-react"
 import Link from "next/link"
 import {formatPrice} from "@/utils/currency"
 import getProductBySlug from "@/app/actions/products/get-product-by-slug"
@@ -12,6 +12,8 @@ import type {Metadata} from "next"
 import {db} from "@/db/config"
 import RichTextDisplay from "@/components/ui/rich-text-display"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
+import ProductReviews from "@/components/client/product/product-reviews"
+import {getSingleProductReviewStats} from "@/app/actions/reviews/review-stats"
 
 export const revalidate = 3600
 
@@ -99,11 +101,13 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
         notFound()
     }
 
+    const reviewStats = await getSingleProductReviewStats(product.id)
+
     const keyFeatures = parseKeyFeatures(product.keyFeatures)
     const specifications = parseSpecifications(product.specifications)
     const hasDescription = !!product.description && product.description !== "<p></p>"
     const hasSpecifications = specifications.length > 0 && specifications.some(g => g.specs.length > 0)
-    const hasBottomContent = hasDescription || hasSpecifications
+    const hasBottomContent = true // Always show: reviews tab is always present
 
     // Parse options for variant selector
     const parsedOptions = (product.options || []).map(o => ({
@@ -169,6 +173,30 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                                 {product.subCategory.name}
                             </p>
                         )}
+                        {reviewStats.totalReviews > 0 && (
+                            <div className="flex items-center gap-1.5 mt-1.5">
+                                <div className="flex items-center gap-0.5">
+                                    {[1, 2, 3, 4, 5].map((s) => (
+                                        <Star
+                                            key={s}
+                                            className={`h-3.5 w-3.5 ${
+                                                reviewStats.averageRating >= s
+                                                    ? "fill-yellow-400 text-yellow-400"
+                                                    : reviewStats.averageRating >= s - 0.5
+                                                        ? "fill-yellow-400/50 text-yellow-400"
+                                                        : "fill-transparent text-muted-foreground/20"
+                                            }`}
+                                        />
+                                    ))}
+                                </div>
+                                <span className="text-sm font-medium text-muted-foreground">
+                                    {reviewStats.averageRating.toFixed(1)}
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                    ({reviewStats.totalReviews} {reviewStats.totalReviews === 1 ? "review" : "reviews"})
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Key Features */}
@@ -219,42 +247,39 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
             {/* ─── Bottom Tabbed Section ─── */}
             {hasBottomContent && (
                 <div className="mt-10 md:mt-14">
-                    <Tabs defaultValue={hasDescription ? "description" : "specification"} className="w-full">
-                        <TabsList className="w-full grid h-auto p-0 bg-transparent rounded-none gap-0" style={{gridTemplateColumns: `repeat(${[hasDescription, hasSpecifications].filter(Boolean).length}, 1fr)`}}>
-                            {hasDescription && (
-                                <TabsTrigger value="description"
-                                    className="rounded-none border border-border py-3 text-sm font-semibold
-                                        data-[state=active]:border-tech-accent data-[state=active]:text-tech-accent data-[state=active]:bg-tech-accent/5 data-[state=active]:shadow-none
-                                        data-[state=inactive]:bg-transparent data-[state=inactive]:text-muted-foreground">
-                                    Description
-                                </TabsTrigger>
-                            )}
-                            {hasSpecifications && (
-                                <TabsTrigger value="specification"
-                                    className="rounded-none border border-border py-3 text-sm font-semibold
-                                        data-[state=active]:border-tech-accent data-[state=active]:text-tech-accent data-[state=active]:bg-tech-accent/5 data-[state=active]:shadow-none
-                                        data-[state=inactive]:bg-transparent data-[state=inactive]:text-muted-foreground">
-                                    Specification
-                                </TabsTrigger>
-                            )}
+                    <Tabs defaultValue="description" className="w-full">
+                        <TabsList className="w-full grid grid-cols-3 h-14 p-1.5 rounded-xl">
+                            <TabsTrigger value="description" className="text-base font-semibold rounded-lg">
+                                Description
+                            </TabsTrigger>
+                            <TabsTrigger value="specification" className="text-base font-semibold rounded-lg">
+                                Specification
+                            </TabsTrigger>
+                            <TabsTrigger value="reviews" className="text-base font-semibold rounded-lg">
+                                Reviews
+                            </TabsTrigger>
                         </TabsList>
 
-                        {hasDescription && (
-                            <TabsContent value="description" className="mt-6">
-                                <div className="max-w-4xl">
+                        <TabsContent value="description" className="mt-6">
+                            <div className="max-w-4xl">
+                                {hasDescription ? (
                                     <RichTextDisplay html={product.description!}
                                         className="prose prose-sm dark:prose-invert max-w-none text-foreground
                                             prose-headings:text-foreground prose-headings:font-semibold
                                             prose-p:text-muted-foreground prose-p:leading-relaxed
                                             prose-li:text-muted-foreground prose-strong:text-foreground"/>
-                                </div>
-                            </TabsContent>
-                        )}
+                                ) : (
+                                    <p className="text-sm text-muted-foreground py-12 text-center">
+                                        No description available for this product.
+                                    </p>
+                                )}
+                            </div>
+                        </TabsContent>
 
-                        {hasSpecifications && (
-                            <TabsContent value="specification" className="mt-6">
-                                <div className="max-w-4xl space-y-6">
-                                    {specifications.map((group, groupIndex) => (
+                        <TabsContent value="specification" className="mt-6">
+                            <div className="max-w-4xl space-y-6">
+                                {hasSpecifications ? (
+                                    specifications.map((group, groupIndex) => (
                                         <div key={groupIndex}>
                                             {group.group && (
                                                 <h3 className="text-sm font-semibold text-foreground bg-muted/50 px-4 py-2.5 rounded-t-lg border border-border border-b-0">
@@ -273,10 +298,20 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                                                 ))}
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </TabsContent>
-                        )}
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-muted-foreground py-12 text-center">
+                                        No specifications available for this product.
+                                    </p>
+                                )}
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="reviews" className="mt-6">
+                            <div className="max-w-4xl">
+                                <ProductReviews productId={product.id}/>
+                            </div>
+                        </TabsContent>
                     </Tabs>
                 </div>
             )}

@@ -11,9 +11,10 @@ interface CategorySectionProps {
         slug: string
         products: ProductWithRelations[]
     }
+    reviewStatsMap?: Record<number, { averageRating: number; totalReviews: number }>
 }
 
-export function CategorySection({ category }: CategorySectionProps) {
+export function CategorySection({ category, reviewStatsMap }: CategorySectionProps) {
     return (
         <section className="mb-10">
             {/* Category Header */}
@@ -40,9 +41,14 @@ export function CategorySection({ category }: CategorySectionProps) {
             {/* Products Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {category.products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard
+                        key={product.id}
+                        product={product}
+                        reviewStats={reviewStatsMap?.[product.id]}
+                    />
                 ))}
             </div>
         </section>
     )
 }
+
