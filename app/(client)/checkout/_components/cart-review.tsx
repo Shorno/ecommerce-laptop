@@ -2,9 +2,9 @@
 import Image from "next/image"
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useCartItems, useCartTotalPrice } from "@/stote/cart-sotre"
+import { useCartItems, useCartTotalPrice, useCartActions } from "@/stote/cart-sotre"
 import { formatPrice } from "@/utils/currency"
-import { ShoppingBag, Truck, ShieldCheck, Clock } from "lucide-react"
+import { ShoppingBag, Truck, ShieldCheck, Clock, Plus, Minus, Trash2 } from "lucide-react"
 
 interface CartReviewProps {
     isProcessing?: boolean
@@ -13,6 +13,7 @@ interface CartReviewProps {
 export default function CartReview({ isProcessing = false }: CartReviewProps) {
     const cartItems = useCartItems()
     const subtotal = useCartTotalPrice()
+    const { increment, decrement, removeItem } = useCartActions()
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0)
 
     return (
@@ -35,7 +36,7 @@ export default function CartReview({ isProcessing = false }: CartReviewProps) {
                     {cartItems.map((item, index) => (
                         <div
                             key={`${item.id}-${index}`}
-                            className="flex items-center gap-3 p-2 rounded-lg bg-muted/50"
+                            className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
                         >
                             <div className="flex-shrink-0 relative">
                                 <div className="relative overflow-hidden rounded-md border bg-white">
@@ -54,8 +55,47 @@ export default function CartReview({ isProcessing = false }: CartReviewProps) {
                                     {item.name}
                                 </h3>
                                 <p className="text-xs text-muted-foreground mt-0.5">
-                                    Qty: {item.quantity} × {formatPrice(item.price)}
+                                    {formatPrice(item.price)} each
                                 </p>
+
+                                {/* Quantity Controls */}
+                                <div className="flex items-center gap-2 mt-2">
+                                    <div className="flex items-center border rounded-md bg-background">
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 rounded-r-none"
+                                            disabled={item.quantity <= 1 || isProcessing}
+                                            onClick={() => decrement(item.id, item.variantId)}
+                                        >
+                                            <Minus className="h-3 w-3" />
+                                        </Button>
+                                        <span className="w-8 text-center text-sm font-medium tabular-nums">
+                                            {item.quantity}
+                                        </span>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 rounded-l-none"
+                                            disabled={item.quantity >= item.maxStock || isProcessing}
+                                            onClick={() => increment(item.id, item.variantId)}
+                                        >
+                                            <Plus className="h-3 w-3" />
+                                        </Button>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        disabled={isProcessing}
+                                        onClick={() => removeItem(item.id, item.variantId)}
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                </div>
                             </div>
 
                             <div className="flex-shrink-0 text-right">
