@@ -19,7 +19,8 @@ interface ProductsPageProps {
 }
 
 export const metadata: Metadata = {
-    title : "Products"
+    title : "Products",
+    description: "Browse premium refurbished laptops and electronics at ROWTECH. Quality inspected, warranty included.",
 };
 
 export const revalidate = 3600
@@ -27,29 +28,29 @@ export const revalidate = 3600
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
     return (
-        <div className="custom-container py-8 md:py-12">
-            <div className="px-4 md:px-6">
-                {/* Header — static, prerendered */}
+        <div className="bg-tech-bg dark:bg-background min-h-screen">
+            <div className="custom-container py-6 md:py-10">
+                {/* Page Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl md:text-4xl font-serif font-light mb-2">
-                        Our Products
+                    <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight mb-1.5">
+                        All Products
                     </h1>
-                    <p className="opacity-60">
-                        Browse our collection of laptops and electronics
+                    <p className="text-sm text-muted-foreground">
+                        Browse our collection of quality-checked refurbished devices
                     </p>
                 </div>
 
                 {/* Main Content */}
-                <div className="flex flex-col lg:flex-row gap-8">
+                <div className="flex gap-8">
                     {/* Sidebar Filter - Desktop Only */}
-                    <aside className="hidden lg:block w-full lg:w-64 flex-shrink-0">
+                    <aside className="hidden lg:block w-60 flex-shrink-0">
                         <Suspense fallback={<FilterSkeleton />}>
                             <ProductsFilter />
                         </Suspense>
                     </aside>
 
-                    {/* Products Grid — streams in based on search params */}
-                    <main className="flex-1">
+                    {/* Products Grid */}
+                    <main className="flex-1 min-w-0">
                         <Suspense fallback={<ProductsGridSkeleton />}>
                             <AllProducts searchParams={searchParams} />
                         </Suspense>
@@ -68,21 +69,26 @@ async function AllProducts({ searchParams }: { searchParams: Promise<SearchParam
 
 function FilterSkeleton() {
     return (
-        <div className="space-y-6">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
+        <div className="space-y-4">
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-px w-full" />
+            <Skeleton className="h-24 w-full rounded-lg" />
+            <Skeleton className="h-px w-full" />
+            <Skeleton className="h-16 w-full rounded-lg" />
         </div>
     )
 }
 
 function ProductsGridSkeleton() {
     return (
-        <div className="space-y-6">
-            <Skeleton className="h-10 w-full" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="space-y-5">
+            <div className="flex items-center justify-between">
+                <Skeleton className="h-5 w-28" />
+                <Skeleton className="h-9 w-44" />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {Array.from({ length: 9 }).map((_, i) => (
-                    <Skeleton key={i} className="h-80 w-full" />
+                    <Skeleton key={i} className="aspect-[3/4] w-full rounded-xl" />
                 ))}
             </div>
         </div>

@@ -28,11 +28,16 @@ export default async function FeaturedProducts() {
             <div className="custom-container">
                 {/* Section Header */}
                 <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                        <div className="w-1 h-7 bg-tech-accent rounded-full" />
-                        <h2 className="text-xl md:text-2xl font-bold text-foreground">
-                            Featured Products
-                        </h2>
+                    <div>
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="w-1 h-7 bg-tech-accent rounded-full" />
+                            <h2 className="text-xl md:text-2xl font-bold text-foreground">
+                                Top Picks
+                            </h2>
+                        </div>
+                        <p className="text-sm text-muted-foreground ml-4 pl-px">
+                            Hand-selected refurbished laptops at unbeatable prices
+                        </p>
                     </div>
                 </div>
 

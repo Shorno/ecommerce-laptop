@@ -6,13 +6,15 @@ import CategoryListing from "@/components/client/product/category-listing";
 import ValueProps from "@/components/home/value-props";
 import BrandShowcase from "@/components/home/brand-showcase";
 import NewsletterSection from "@/components/home/newsletter-section";
+import TrustBar from "@/components/home/trust-bar";
+import HowItWorks from "@/components/home/how-it-works";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
     title: "Home",
-    description: "Discover the latest laptops, electronics, and tech accessories. Shop premium brands at the best prices at ROWTECH.",
+    description: "Shop premium refurbished laptops and electronics — quality inspected, warranty included. ROWTECH is Bangladesh's trusted source for certified used tech.",
 };
 
 export const revalidate = 3600
@@ -85,10 +87,14 @@ export default function HomePage() {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{__html: JSON.stringify(jsonLd).replace(/</g, "\\u003c")}}
             />
-            {/* 1. Hero Carousel + Side Banners */}
+
+            {/* 1. Hero Carousel — full-width, cinematic */}
             <FeaturedImages />
 
-            {/* 2. Browse Categories */}
+            {/* 2. Trust Signals — immediate credibility */}
+            <TrustBar />
+
+            {/* 3. Browse by Category */}
             <Suspense fallback={
                 <div className="custom-container py-8">
                     <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
@@ -101,30 +107,33 @@ export default function HomePage() {
                 <CategoryGrid />
             </Suspense>
 
-            {/* 3. Featured Products */}
+            {/* 4. Top Picks — hand-selected featured products */}
             <Suspense fallback={<SectionSkeleton />}>
                 <FeaturedProducts />
             </Suspense>
 
-            {/* 4. Promotional Banners — visual break */}
+            {/* 5. How It Works — refurbishment process */}
+            <HowItWorks />
+
+            {/* 6. Promotional Banners */}
             <Suspense fallback={<PromoBannerSkeleton />}>
                 <PromoBanner />
             </Suspense>
 
-            {/* 5. Category-wise Product Listings */}
+            {/* 7. Category-wise Product Listings */}
             <Suspense fallback={<SectionSkeleton />}>
                 <CategoryListing />
             </Suspense>
 
-            {/* 6. Value Propositions — trust signals */}
+            {/* 8. Why Choose ROWTECH — trust-focused value props */}
             <ValueProps />
 
-            {/* 7. Brand Showcase */}
+            {/* 9. Brand Showcase */}
             <Suspense fallback={<BrandSkeleton />}>
                 <BrandShowcase />
             </Suspense>
 
-            {/* 8. Newsletter CTA */}
+            {/* 10. Newsletter */}
             <NewsletterSection />
         </div>
     )

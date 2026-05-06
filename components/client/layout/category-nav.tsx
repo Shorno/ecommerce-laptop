@@ -30,19 +30,19 @@ export default function CategoryNav({ categories }: CategoryNavProps) {
     if (allSubcategories.length === 0) return null
 
     return (
-        <div className="hidden lg:block border-b bg-card">
+        <div className="hidden lg:block border-b border-border/60 bg-card/80 backdrop-blur-sm">
             <div className="container mx-auto max-w-[1400px] px-4 md:px-6">
-                <div className="flex items-center gap-5 overflow-x-auto py-2.5">
+                <div className="flex items-center gap-6 overflow-x-auto py-2.5 scrollbar-none">
                     {allSubcategories.map((sub) => {
                         const isActive = activeSubcategorySlug === sub.slug
                         return (
                             <Link
                                 key={sub.id}
                                 href={`/${sub.categorySlug}/${sub.slug}`}
-                                className={`text-sm whitespace-nowrap transition-colors font-medium ${
+                                className={`text-[13px] whitespace-nowrap transition-colors font-medium ${
                                     isActive
                                         ? "text-tech-accent"
-                                        : "text-foreground/70 hover:text-tech-accent"
+                                        : "text-foreground/60 hover:text-foreground"
                                 }`}
                             >
                                 {sub.name}

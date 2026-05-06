@@ -17,7 +17,7 @@ export function Footer() {
                         <div className="flex flex-col gap-4">
                             <Logo showTagline={false} />
                             <p className="text-sm text-white/60 leading-relaxed">
-                                Your trusted online destination for laptops, electronics, and tech accessories.
+                                Bangladesh&apos;s trusted destination for premium refurbished laptops &amp; electronics.
                             </p>
 
                             {/* Contact Information */}

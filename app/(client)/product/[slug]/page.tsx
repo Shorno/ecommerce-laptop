@@ -1,8 +1,6 @@
 import {notFound} from "next/navigation"
 import {Badge} from "@/components/ui/badge"
-import {Separator} from "@/components/ui/separator"
-import {Button} from "@/components/ui/button"
-import {ArrowLeft, Star, Zap} from "lucide-react"
+import {ArrowLeft, Star, Zap, ShieldCheck, RotateCcw, Truck} from "lucide-react"
 import Link from "next/link"
 import {formatPrice} from "@/utils/currency"
 import getProductBySlug from "@/app/actions/products/get-product-by-slug"
@@ -92,6 +90,12 @@ function parseSpecifications(raw: string | null): SpecGroup[] {
     }
 }
 
+const trustBadges = [
+    {icon: ShieldCheck, label: "Quality Checked"},
+    {icon: RotateCcw, label: "Easy Returns"},
+    {icon: Truck, label: "Fast Delivery"},
+]
+
 
 export default async function ProductDetailsPage({params}: ProductDetailsPageProps) {
     const {slug} = await params
@@ -107,7 +111,6 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
     const specifications = parseSpecifications(product.specifications)
     const hasDescription = !!product.description && product.description !== "<p></p>"
     const hasSpecifications = specifications.length > 0 && specifications.some(g => g.specs.length > 0)
-    const hasBottomContent = true // Always show: reviews tab is always present
 
     // Parse options for variant selector
     const parsedOptions = (product.options || []).map(o => ({
@@ -125,196 +128,213 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
             : null,
     }))
 
-    const hasMultipleVariants = parsedVariants.length > 1
-
     return (
-        <div className="container mx-auto max-w-[1400px] px-4 md:px-6 py-4 md:py-6">
-            {/* Back Button */}
-            <div className="mb-4">
-                <Link href="/products">
-                    <Button variant="ghost" size="sm" className="gap-2 h-8">
+        <div className="bg-tech-bg dark:bg-background min-h-screen">
+            <div className="custom-container py-4 md:py-8">
+                {/* Breadcrumb */}
+                <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+                    <Link href="/products" className="hover:text-foreground transition-colors flex items-center gap-1.5">
                         <ArrowLeft className="h-3.5 w-3.5"/>
-                        Back to Products
-                    </Button>
-                </Link>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
-                {/* Left Column - Images */}
-                <div>
-                    <ProductImageGallery
-                        mainImage={product.image}
-                        additionalImages={product.images}
-                        productName={product.name}
-                    />
-                </div>
-
-                {/* Right Column - Product Info */}
-                <div className="space-y-4">
-                    {/* Category & Featured Badge */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <Link href={`/${product.category.slug}`}>
-                            <Badge variant="secondary" className="text-xs hover:bg-secondary/80 cursor-pointer">
-                                {product.category.name}
-                            </Badge>
-                        </Link>
-                        {product.isFeatured && (
-                            <Badge className="text-xs bg-tech-accent text-white border-0">Featured</Badge>
-                        )}
-                    </div>
-
-                    {/* Product Name */}
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-bold mb-1">
-                            {product.name}
-                        </h1>
-                        {product.subCategory && (
-                            <p className="text-sm text-muted-foreground">
-                                {product.subCategory.name}
-                            </p>
-                        )}
-                        {reviewStats.totalReviews > 0 && (
-                            <div className="flex items-center gap-1.5 mt-1.5">
-                                <div className="flex items-center gap-0.5">
-                                    {[1, 2, 3, 4, 5].map((s) => (
-                                        <Star
-                                            key={s}
-                                            className={`h-3.5 w-3.5 ${
-                                                reviewStats.averageRating >= s
-                                                    ? "fill-yellow-400 text-yellow-400"
-                                                    : reviewStats.averageRating >= s - 0.5
-                                                        ? "fill-yellow-400/50 text-yellow-400"
-                                                        : "fill-transparent text-muted-foreground/20"
-                                            }`}
-                                        />
-                                    ))}
-                                </div>
-                                <span className="text-sm font-medium text-muted-foreground">
-                                    {reviewStats.averageRating.toFixed(1)}
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                    ({reviewStats.totalReviews} {reviewStats.totalReviews === 1 ? "review" : "reviews"})
-                                </span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Key Features */}
-                    {keyFeatures.length > 0 && (
+                        Products
+                    </Link>
+                    <span className="text-border">/</span>
+                    <Link href={`/${product.category.slug}`} className="hover:text-foreground transition-colors">
+                        {product.category.name}
+                    </Link>
+                    {product.subCategory && (
                         <>
-                            <Separator/>
-                            <div id="key-features">
-                                <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                                    <Zap className="h-4 w-4 text-tech-accent"/>
-                                    Key Features
-                                </h2>
-                                <div className="space-y-1.5">
-                                    {keyFeatures.map((feature, index) => (
-                                        <div key={index} className="flex text-sm">
-                                            {feature.label ? (
-                                                <>
-                                                    <span className="text-muted-foreground min-w-[120px] flex-shrink-0">
-                                                        {feature.label}:
-                                                    </span>
-                                                    <span className="font-medium text-foreground">
-                                                        {feature.value}
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                <span className="text-foreground">• {feature.value}</span>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            <span className="text-border">/</span>
+                            <span className="text-foreground/60 truncate max-w-[200px]">{product.subCategory.name}</span>
                         </>
                     )}
+                </nav>
 
-                    <Separator/>
+                {/* Main Product Section */}
+                <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+                    <div className="grid grid-cols-1 lg:grid-cols-2">
+                        {/* Left Column - Images */}
+                        <div className="p-4 md:p-6 lg:p-8 bg-gradient-to-br from-muted/20 to-muted/5">
+                            <ProductImageGallery
+                                mainImage={product.image}
+                                additionalImages={product.images}
+                                productName={product.name}
+                            />
+                        </div>
 
-                    {/* Client-side: Price/Variant Selector/Actions */}
-                    <ProductPageClient
-                        productId={product.id}
-                        productName={product.name}
-                        productImage={product.image}
-                        options={parsedOptions}
-                        variants={parsedVariants}
-                        isFeatured={product.isFeatured}
-                    />
+                        {/* Right Column - Product Info */}
+                        <div className="p-5 md:p-6 lg:p-8 flex flex-col">
+                            {/* Category breadcrumb */}
+                            <div className="flex items-center gap-2 flex-wrap mb-3">
+                                <Link href={`/${product.category.slug}`}>
+                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">
+                                        {product.category.name}
+                                    </span>
+                                </Link>
+                            </div>
+
+                            {/* Product Name */}
+                            <h1 className="text-xl md:text-2xl lg:text-[1.65rem] font-bold text-foreground leading-tight tracking-tight mb-2">
+                                {product.name}
+                            </h1>
+
+                            {/* Rating */}
+                            {reviewStats.totalReviews > 0 && (
+                                <div className="flex items-center gap-2 mb-4">
+                                    <div className="flex items-center gap-0.5">
+                                        {[1, 2, 3, 4, 5].map((s) => (
+                                            <Star
+                                                key={s}
+                                                className={`h-3.5 w-3.5 ${
+                                                    reviewStats.averageRating >= s
+                                                        ? "fill-amber-400 text-amber-400"
+                                                        : reviewStats.averageRating >= s - 0.5
+                                                            ? "fill-amber-400/50 text-amber-400"
+                                                            : "fill-transparent text-muted-foreground/20"
+                                                }`}
+                                            />
+                                        ))}
+                                    </div>
+                                    <span className="text-sm text-muted-foreground">
+                                        {reviewStats.averageRating.toFixed(1)} ({reviewStats.totalReviews})
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Key Features */}
+                            {keyFeatures.length > 0 && (
+                                <div className="mb-5">
+                                    <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                                        <Zap className="h-3.5 w-3.5 text-tech-accent"/>
+                                        Key Features
+                                    </h2>
+                                    <div className="space-y-1">
+                                        {keyFeatures.map((feature, index) => (
+                                            <div key={index} className="flex text-sm">
+                                                {feature.label ? (
+                                                    <>
+                                                        <span className="text-muted-foreground min-w-[120px] flex-shrink-0">
+                                                            {feature.label}
+                                                        </span>
+                                                        <span className="font-medium text-foreground">
+                                                            {feature.value}
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    <span className="text-foreground">• {feature.value}</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Divider */}
+                            <div className="h-px bg-border/60 mb-5"/>
+
+                            {/* Client-side: Price/Variant Selector/Actions */}
+                            <ProductPageClient
+                                productId={product.id}
+                                productName={product.name}
+                                productImage={product.image}
+                                options={parsedOptions}
+                                variants={parsedVariants}
+                                isFeatured={product.isFeatured}
+                            />
+
+                            {/* Trust Badges */}
+                            <div className="mt-auto pt-5">
+                                <div className="flex items-center gap-5 border-t border-border/40 pt-4">
+                                    {trustBadges.map((badge, i) => {
+                                        const Icon = badge.icon
+                                        return (
+                                            <div key={i} className="flex items-center gap-1.5">
+                                                <Icon className="h-3.5 w-3.5 text-muted-foreground"/>
+                                                <span className="text-xs text-muted-foreground">{badge.label}</span>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {/* ─── Bottom Tabbed Section ─── */}
-            {hasBottomContent && (
-                <div className="mt-10 md:mt-14">
+                {/* ─── Bottom Tabbed Section ─── */}
+                <div className="mt-8 md:mt-12">
                     <Tabs defaultValue="description" className="w-full">
-                        <TabsList className="w-full grid grid-cols-3 h-14 p-1.5 rounded-xl">
-                            <TabsTrigger value="description" className="text-base font-semibold rounded-lg">
+                        <TabsList className="w-full grid grid-cols-3 h-12 p-1 rounded-xl bg-muted/50">
+                            <TabsTrigger value="description" className="text-sm font-medium rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
                                 Description
                             </TabsTrigger>
-                            <TabsTrigger value="specification" className="text-base font-semibold rounded-lg">
-                                Specification
+                            <TabsTrigger value="specification" className="text-sm font-medium rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
+                                Specifications
                             </TabsTrigger>
-                            <TabsTrigger value="reviews" className="text-base font-semibold rounded-lg">
+                            <TabsTrigger value="reviews" className="text-sm font-medium rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
                                 Reviews
                             </TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="description" className="mt-6">
-                            <div className="max-w-4xl">
-                                {hasDescription ? (
-                                    <RichTextDisplay html={product.description!}
-                                        className="prose prose-sm dark:prose-invert max-w-none text-foreground
-                                            prose-headings:text-foreground prose-headings:font-semibold
-                                            prose-p:text-muted-foreground prose-p:leading-relaxed
-                                            prose-li:text-muted-foreground prose-strong:text-foreground"/>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground py-12 text-center">
-                                        No description available for this product.
-                                    </p>
-                                )}
+                            <div className="bg-card rounded-xl border border-border/60 p-6 md:p-8">
+                                <div className="max-w-3xl">
+                                    {hasDescription ? (
+                                        <RichTextDisplay html={product.description!}
+                                            className="prose prose-sm dark:prose-invert max-w-none text-foreground
+                                                prose-headings:text-foreground prose-headings:font-semibold
+                                                prose-p:text-muted-foreground prose-p:leading-relaxed
+                                                prose-li:text-muted-foreground prose-strong:text-foreground"/>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground py-12 text-center">
+                                            No description available for this product.
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </TabsContent>
 
                         <TabsContent value="specification" className="mt-6">
-                            <div className="max-w-4xl space-y-6">
-                                {hasSpecifications ? (
-                                    specifications.map((group, groupIndex) => (
-                                        <div key={groupIndex}>
-                                            {group.group && (
-                                                <h3 className="text-sm font-semibold text-foreground bg-muted/50 px-4 py-2.5 rounded-t-lg border border-border border-b-0">
-                                                    {group.group}
-                                                </h3>
-                                            )}
-                                            <div className={`border border-border overflow-hidden ${group.group ? "rounded-b-lg" : "rounded-lg"}`}>
-                                                {group.specs.map((spec, specIndex) => (
-                                                    <div key={specIndex}
-                                                         className={`grid grid-cols-[200px_1fr] text-sm ${
-                                                             specIndex % 2 === 0 ? "bg-card" : "bg-muted/20"
-                                                         } ${specIndex < group.specs.length - 1 ? "border-b border-border" : ""}`}>
-                                                        <div className="px-4 py-2.5 text-muted-foreground font-medium border-r border-border">{spec.label}</div>
-                                                        <div className="px-4 py-2.5 text-foreground">{spec.value}</div>
-                                                    </div>
-                                                ))}
+                            <div className="bg-card rounded-xl border border-border/60 p-6 md:p-8">
+                                <div className="max-w-3xl space-y-6">
+                                    {hasSpecifications ? (
+                                        specifications.map((group, groupIndex) => (
+                                            <div key={groupIndex}>
+                                                {group.group && (
+                                                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                                                        {group.group}
+                                                    </h3>
+                                                )}
+                                                <div className="border border-border/60 rounded-lg overflow-hidden">
+                                                    {group.specs.map((spec, specIndex) => (
+                                                        <div key={specIndex}
+                                                             className={`grid grid-cols-[180px_1fr] text-sm ${
+                                                                 specIndex % 2 === 0 ? "bg-card" : "bg-muted/20"
+                                                             } ${specIndex < group.specs.length - 1 ? "border-b border-border/40" : ""}`}>
+                                                            <div className="px-4 py-2.5 text-muted-foreground font-medium border-r border-border/40">{spec.label}</div>
+                                                            <div className="px-4 py-2.5 text-foreground">{spec.value}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-sm text-muted-foreground py-12 text-center">
-                                        No specifications available for this product.
-                                    </p>
-                                )}
+                                        ))
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground py-12 text-center">
+                                            No specifications available for this product.
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </TabsContent>
 
                         <TabsContent value="reviews" className="mt-6">
-                            <div className="max-w-4xl">
-                                <ProductReviews productId={product.id}/>
+                            <div className="bg-card rounded-xl border border-border/60 p-6 md:p-8">
+                                <div className="max-w-3xl">
+                                    <ProductReviews productId={product.id}/>
+                                </div>
                             </div>
                         </TabsContent>
                     </Tabs>
                 </div>
-            )}
+            </div>
         </div>
     )
 }

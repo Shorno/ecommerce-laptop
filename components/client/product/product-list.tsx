@@ -11,21 +11,21 @@ export default async function ProductList() {
     return (
         <div className="w-full">
             {/* Header Section */}
-            <div className="bg-gradient-to-b from-neutral-50 to-white px-6 py-16 md:px-12 md:py-24">
-                <div className="mx-auto text-center">
-                    <h1 className="text-4xl md:text-5xl font-serif font-light text-neutral-900 mb-4 text-balance">
-                        Premium Laptops & Electronics
+            <div className="bg-tech-bg dark:bg-background px-6 py-12 md:px-12 md:py-16">
+                <div className="mx-auto max-w-[1400px]">
+                    <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight mb-1.5">
+                        All Products
                     </h1>
-                    <p className="text-lg text-neutral-600 max-w-2xl mx-auto text-balance">
-                        Discover our carefully curated selection of laptops, accessories, and tech gadgets from the world's leading brands
+                    <p className="text-sm text-muted-foreground">
+                        Browse our full collection of quality-checked devices
                     </p>
                 </div>
             </div>
 
             {/* Products Grid */}
-            <div className="px-6 py-12 md:px-12 md:py-16">
-                <div className="mx-auto">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            <div className="px-6 py-10 md:px-12 md:py-14">
+                <div className="mx-auto max-w-[1400px]">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
                         {products.map((product) => (
                             <ProductCard 
                                 key={product.id} 

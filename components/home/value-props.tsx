@@ -1,6 +1,11 @@
-import {Truck, ShieldCheck, RotateCcw, Award} from "lucide-react"
+import {Truck, ShieldCheck, RotateCcw, BadgeCheck} from "lucide-react"
 
 const valueProps = [
+    {
+        icon: BadgeCheck,
+        title: "Quality Guaranteed",
+        description: "Every device inspected & certified",
+    },
     {
         icon: Truck,
         title: "Free Delivery",
@@ -8,18 +13,13 @@ const valueProps = [
     },
     {
         icon: ShieldCheck,
-        title: "Secure Payment",
-        description: "100% secure checkout",
+        title: "Secure Checkout",
+        description: "100% secure payment",
     },
     {
         icon: RotateCcw,
-        title: "Easy Returns",
-        description: "Hassle-free returns",
-    },
-    {
-        icon: Award,
-        title: "Official Warranty",
-        description: "Genuine products only",
+        title: "Hassle-Free Returns",
+        description: "Easy return policy",
     },
 ]
 
@@ -27,6 +27,14 @@ export default function ValueProps() {
     return (
         <section className="py-8 md:py-12" id="value-propositions">
             <div className="custom-container">
+                {/* Section Header */}
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-1 h-7 bg-tech-accent rounded-full"/>
+                    <h2 className="text-xl md:text-2xl font-bold text-foreground">
+                        Why Choose ROWTECH
+                    </h2>
+                </div>
+
                 <div className="bg-card border border-border rounded-xl p-6 md:p-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
                         {valueProps.map((prop, index) => {
