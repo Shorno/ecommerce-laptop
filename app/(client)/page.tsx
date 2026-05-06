@@ -6,7 +6,7 @@ import CategoryListing from "@/components/client/product/category-listing";
 import ValueProps from "@/components/home/value-props";
 import BrandShowcase from "@/components/home/brand-showcase";
 import NewsletterSection from "@/components/home/newsletter-section";
-import TrustBar from "@/components/home/trust-bar";
+
 import HowItWorks from "@/components/home/how-it-works";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -25,7 +25,18 @@ function SectionSkeleton() {
             <Skeleton className="h-8 w-48 mb-6" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-72 w-full rounded-lg" />
+                    <div key={i} className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+                        <Skeleton className="aspect-[4/3] w-full rounded-none" />
+                        <div className="p-3.5 space-y-2.5">
+                            <Skeleton className="h-3 w-16" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-3/4" />
+                            <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                                <Skeleton className="h-5 w-24" />
+                                <Skeleton className="h-4 w-14 rounded-full" />
+                            </div>
+                        </div>
+                    </div>
                 ))}
             </div>
         </div>
@@ -91,8 +102,6 @@ export default function HomePage() {
             {/* 1. Hero Carousel — full-width, cinematic */}
             <FeaturedImages />
 
-            {/* 2. Trust Signals — immediate credibility */}
-            <TrustBar />
 
             {/* 3. Browse by Category */}
             <Suspense fallback={

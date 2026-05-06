@@ -8,7 +8,7 @@ import MobileNav from "@/components/client/layout/mobile-nav";
 import {CategoryWithSubcategories} from "@/app/(admin)/admin/dashboard/category/_components/category/category-columns";
 import Link from "next/link";
 import CartDrawer from "@/components/client/cart/cart-drawer";
-import {ModeToggle} from "@/components/mode-toggle";
+
 import {useState} from "react";
 import InlineSearch from "@/components/client/layout/inline-search";
 
@@ -63,9 +63,7 @@ export default function Navbar({categories}: NavbarProps) {
                         <SearchIcon className="h-5 w-5"/>
                         <span className="sr-only">Search</span>
                     </Button>
-                    <div className={"hidden md:block dark"}>
-                        <ModeToggle/>
-                    </div>
+
                     <UserButton/>
                     <CartDrawer/>
                 </div>
