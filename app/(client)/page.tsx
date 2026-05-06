@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
     title: "Home",
-    description: "Discover the latest laptops, electronics, and tech accessories. Shop premium brands at the best prices at LaptopBD.",
+    description: "Discover the latest laptops, electronics, and tech accessories. Shop premium brands at the best prices at ROWTECH.",
 };
 
 export const revalidate = 3600
@@ -62,7 +62,7 @@ export default function HomePage() {
         "@graph": [
             {
                 "@type": "WebSite",
-                "name": "LaptopBD",
+                "name": "ROWTECH",
                 "url": siteUrl,
                 "potentialAction": {
                     "@type": "SearchAction",
@@ -72,7 +72,7 @@ export default function HomePage() {
             },
             {
                 "@type": "Organization",
-                "name": "LaptopBD",
+                "name": "ROWTECH",
                 "url": siteUrl,
                 "logo": `${siteUrl}/icon.png`,
             },

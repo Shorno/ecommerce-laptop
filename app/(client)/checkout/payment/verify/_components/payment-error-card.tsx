@@ -36,8 +36,8 @@ export default function PaymentErrorCard({
             {/* Logo Header */}
             <div className="flex items-center justify-center py-6 border-b">
                 <Image
-                    src="/logo.png"
-                    alt="Game Lounge Eshop"
+                    src="/logos/Raw.png"
+                    alt="ROWTECH"
                     width={120}
                     height={60}
                     className="object-contain"

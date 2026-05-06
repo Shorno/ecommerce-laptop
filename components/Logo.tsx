@@ -1,4 +1,4 @@
-import { Laptop } from "lucide-react";
+import Image from "next/image";
 
 interface LogoProps {
     className?: string;
@@ -9,9 +9,15 @@ export default function Logo({className = '', showTagline = true }: LogoProps) {
     return (
         <div className={`flex flex-col items-start ${className}`}>
             <div className={`font-bold text-xl sm:text-2xl lg:text-3xl flex items-center gap-1.5`}>
-                <Laptop className="w-6 h-6 sm:w-7 sm:h-7 text-tech-accent" />
-                <span className="text-current">Laptop</span>
-                <span className="text-tech-accent">BD</span>
+                <Image
+                    src="/logos/Raw.png"
+                    alt="ROWTECH"
+                    width={32}
+                    height={32}
+                    className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                />
+                <span className="text-current">ROW</span>
+                <span className="text-tech-accent">TECH</span>
             </div>
             {showTagline && (
                 <span className="text-xs md:text-sm text-muted-foreground">Your Trusted Tech Partner</span>

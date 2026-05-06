@@ -16,6 +16,6 @@ export const PAYMENT_CONFIG = {
 } as const;
 
 export const MERCHANT_INFO = {
-    name: "LaptopBD",
-    logo: "/images/site-logo.png",
+    name: "ROWTECH",
+    logo: "/logos/Raw.png",
 } as const;

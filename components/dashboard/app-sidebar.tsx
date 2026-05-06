@@ -111,11 +111,11 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                             <Link href="/" className="flex items-center gap-2.5">
                                 <div
                                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                                    <span className="text-sm font-bold tracking-tight">LB</span>
+                                    <span className="text-sm font-bold tracking-tight">RT</span>
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-sm font-semibold tracking-tight text-foreground">
-                                        LaptopBD
+                                        ROWTECH
                                     </span>
                                     <span className="text-[11px] font-medium text-muted-foreground">
                                         Admin Console

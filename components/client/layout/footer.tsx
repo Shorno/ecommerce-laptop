@@ -34,10 +34,10 @@ export function Footer() {
                                 <div className="flex items-center gap-3">
                                     <Mail className="w-4 h-4 text-tech-accent flex-shrink-0" />
                                     <a
-                                        href="mailto:support@laptopbd.com"
+                                        href="mailto:support@rowtech.com"
                                         className="text-sm text-white/70 hover:text-tech-accent transition-colors"
                                     >
-                                        support@laptopbd.com
+                                        support@rowtech.com
                                     </a>
                                 </div>
                             </div>
@@ -102,7 +102,7 @@ export function Footer() {
 
                     {/* Bottom Section */}
                     <p className="text-xs text-white/40 text-center">
-                        &copy; {new Date().getFullYear()} LaptopBD. All rights reserved.
+                        &copy; {new Date().getFullYear()} ROWTECH. All rights reserved.
                     </p>
                 </div>
             </div>
