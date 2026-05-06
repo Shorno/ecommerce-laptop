@@ -2,7 +2,7 @@
 
 import {db} from "@/db/config"
 import {review} from "@/db/schema/review"
-import {eq, and, sql} from "drizzle-orm"
+import {eq, and, sql, inArray} from "drizzle-orm"
 
 /**
  * Get approved review stats for multiple products at once (for product listings).
@@ -24,7 +24,7 @@ export async function getProductReviewStats(productIds: number[]): Promise<
             .where(
                 and(
                     eq(review.isApproved, true),
-                    sql`${review.productId} = ANY(${productIds})`
+                    inArray(review.productId, productIds)
                 )
             )
             .groupBy(review.productId)

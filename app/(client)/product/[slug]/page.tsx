@@ -1,15 +1,16 @@
 import {notFound} from "next/navigation"
-import {Badge} from "@/components/ui/badge"
 import {ArrowLeft, Star, Zap, ShieldCheck, RotateCcw, Truck} from "lucide-react"
 import Link from "next/link"
 import {formatPrice} from "@/utils/currency"
 import getProductBySlug from "@/app/actions/products/get-product-by-slug"
+import {getRelatedProducts} from "@/app/actions/products/get-related-products"
 import {ProductImageGallery} from "@/components/client/product/product-image-gallery"
 import {ProductPageClient} from "@/components/client/product/product-page-client"
+import {SectionNav} from "@/components/client/product/section-nav"
+import {RelatedProductsSidebar} from "@/components/client/product/related-products-sidebar"
 import type {Metadata} from "next"
 import {db} from "@/db/config"
 import RichTextDisplay from "@/components/ui/rich-text-display"
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import ProductReviews from "@/components/client/product/product-reviews"
 import {getSingleProductReviewStats} from "@/app/actions/reviews/review-stats"
 
@@ -76,8 +77,15 @@ function parseKeyFeatures(raw: string | null): { label: string; value: string }[
     }
 }
 
-interface SpecItem { label: string; value: string }
-interface SpecGroup { group: string; specs: SpecItem[] }
+interface SpecItem {
+    label: string;
+    value: string
+}
+
+interface SpecGroup {
+    group: string;
+    specs: SpecItem[]
+}
 
 function parseSpecifications(raw: string | null): SpecGroup[] {
     if (!raw) return []
@@ -105,7 +113,11 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
         notFound()
     }
 
-    const reviewStats = await getSingleProductReviewStats(product.id)
+    // Fetch data in parallel
+    const [reviewStats, relatedProducts] = await Promise.all([
+        getSingleProductReviewStats(product.id),
+        getRelatedProducts(product.id, product.categoryId, 6),
+    ])
 
     const keyFeatures = parseKeyFeatures(product.keyFeatures)
     const specifications = parseSpecifications(product.specifications)
@@ -115,7 +127,13 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
     // Parse options for variant selector
     const parsedOptions = (product.options || []).map(o => ({
         name: o.name,
-        values: (() => { try { return JSON.parse(o.values) as string[] } catch { return [] } })(),
+        values: (() => {
+            try {
+                return JSON.parse(o.values) as string[]
+            } catch {
+                return []
+            }
+        })(),
     }))
 
     const parsedVariants = (product.variants || []).map(v => ({
@@ -124,16 +142,30 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
         stock: v.stock,
         inStock: v.inStock,
         optionValues: v.optionValues
-            ? (() => { try { return JSON.parse(v.optionValues) as Record<string, string> } catch { return null } })()
+            ? (() => {
+                try {
+                    return JSON.parse(v.optionValues) as Record<string, string>
+                } catch {
+                    return null
+                }
+            })()
             : null,
     }))
+
+    // Build section nav items
+    const sectionItems = [
+        {id: "specification", label: "Specification"},
+        {id: "description", label: "Description"},
+        {id: "reviews", label: "Reviews", count: reviewStats.totalReviews},
+    ]
 
     return (
         <div className="bg-tech-bg dark:bg-background min-h-screen">
             <div className="custom-container py-4 md:py-8">
                 {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-                    <Link href="/products" className="hover:text-foreground transition-colors flex items-center gap-1.5">
+                    <Link href="/products"
+                          className="hover:text-foreground transition-colors flex items-center gap-1.5">
                         <ArrowLeft className="h-3.5 w-3.5"/>
                         Products
                     </Link>
@@ -144,12 +176,13 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                     {product.subCategory && (
                         <>
                             <span className="text-border">/</span>
-                            <span className="text-foreground/60 truncate max-w-[200px]">{product.subCategory.name}</span>
+                            <span
+                                className="text-foreground/60 truncate max-w-[200px]">{product.subCategory.name}</span>
                         </>
                     )}
                 </nav>
 
-                {/* Main Product Section */}
+                {/* ─── Top: Product Hero Section ─── */}
                 <div className="bg-card rounded-2xl border border-border/60 overflow-hidden">
                     <div className="grid grid-cols-1 lg:grid-cols-2">
                         {/* Left Column - Images */}
@@ -163,10 +196,11 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
 
                         {/* Right Column - Product Info */}
                         <div className="p-5 md:p-6 lg:p-8 flex flex-col">
-                            {/* Category breadcrumb */}
+                            {/* Category */}
                             <div className="flex items-center gap-2 flex-wrap mb-3">
                                 <Link href={`/${product.category.slug}`}>
-                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">
+                                    <span
+                                        className="text-xs font-medium text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">
                                         {product.category.name}
                                     </span>
                                 </Link>
@@ -212,7 +246,8 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                                             <div key={index} className="flex text-sm">
                                                 {feature.label ? (
                                                     <>
-                                                        <span className="text-muted-foreground min-w-[120px] flex-shrink-0">
+                                                        <span
+                                                            className="text-muted-foreground min-w-[120px] flex-shrink-0">
                                                             {feature.label}
                                                         </span>
                                                         <span className="font-medium text-foreground">
@@ -249,7 +284,8 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                                         return (
                                             <div key={i} className="flex items-center gap-1.5">
                                                 <Icon className="h-3.5 w-3.5 text-muted-foreground"/>
-                                                <span className="text-xs text-muted-foreground">{badge.label}</span>
+                                                <span
+                                                    className="text-xs text-muted-foreground">{badge.label}</span>
                                             </div>
                                         )
                                     })}
@@ -259,27 +295,67 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                     </div>
                 </div>
 
-                {/* ─── Bottom Tabbed Section ─── */}
-                <div className="mt-8 md:mt-12">
-                    <Tabs defaultValue="description" className="w-full">
-                        <TabsList className="w-full grid grid-cols-3 h-12 p-1 rounded-xl bg-muted/50">
-                            <TabsTrigger value="description" className="text-sm font-medium rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
-                                Description
-                            </TabsTrigger>
-                            <TabsTrigger value="specification" className="text-sm font-medium rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
-                                Specifications
-                            </TabsTrigger>
-                            <TabsTrigger value="reviews" className="text-sm font-medium rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
-                                Reviews
-                            </TabsTrigger>
-                        </TabsList>
+                {/* ─── Bottom: Section Nav + Content + Related Sidebar ─── */}
+                <div className="mt-8 md:mt-10">
+                    {/* Sticky Section Navigation */}
+                    <SectionNav sections={sectionItems}/>
 
-                        <TabsContent value="description" className="mt-6">
-                            <div className="bg-card rounded-xl border border-border/60 p-6 md:p-8">
-                                <div className="max-w-3xl">
+                    {/* Content + Sidebar grid */}
+                    <div className="mt-6 flex gap-6">
+                        {/* Main content — sections stacked vertically */}
+                        <div className="flex-1 min-w-0 space-y-8">
+                            {/* ── Specification Section ── */}
+                            <section id="specification">
+                                <h2 className="text-lg font-bold text-foreground mb-4">
+                                    Specification
+                                </h2>
+                                <div className="bg-card rounded-xl border border-border/60 overflow-hidden">
+                                    {hasSpecifications ? (
+                                        <div className="divide-y divide-border/40">
+                                            {specifications.map((group, groupIndex) => (
+                                                <div key={groupIndex}>
+                                                    {group.group && (
+                                                        <div className="px-4 py-2.5 bg-muted/40">
+                                                            <h3 className="text-sm font-semibold text-tech-accent">
+                                                                {group.group}
+                                                            </h3>
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        {group.specs.map((spec, specIndex) => (
+                                                            <div key={specIndex}
+                                                                 className={`grid grid-cols-[180px_1fr] text-sm ${
+                                                                     specIndex % 2 === 0 ? "bg-card" : "bg-muted/15"
+                                                                 } ${specIndex < group.specs.length - 1 ? "border-b border-border/30" : ""}`}>
+                                                                <div
+                                                                    className="px-4 py-2.5 text-muted-foreground font-medium border-r border-border/30">
+                                                                    {spec.label}
+                                                                </div>
+                                                                <div
+                                                                    className="px-4 py-2.5 text-foreground">{spec.value}</div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground py-12 text-center">
+                                            No specifications available for this product.
+                                        </p>
+                                    )}
+                                </div>
+                            </section>
+
+                            {/* ── Description Section ── */}
+                            <section id="description">
+                                <h2 className="text-lg font-bold text-foreground mb-4">
+                                    Description
+                                </h2>
+                                <div className="bg-card rounded-xl border border-border/60 p-5 md:p-6">
                                     {hasDescription ? (
                                         <RichTextDisplay html={product.description!}
-                                            className="prose prose-sm dark:prose-invert max-w-none text-foreground
+                                                         className="prose prose-sm dark:prose-invert max-w-none text-foreground
                                                 prose-headings:text-foreground prose-headings:font-semibold
                                                 prose-p:text-muted-foreground prose-p:leading-relaxed
                                                 prose-li:text-muted-foreground prose-strong:text-foreground"/>
@@ -289,50 +365,29 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                                         </p>
                                     )}
                                 </div>
-                            </div>
-                        </TabsContent>
+                            </section>
 
-                        <TabsContent value="specification" className="mt-6">
-                            <div className="bg-card rounded-xl border border-border/60 p-6 md:p-8">
-                                <div className="max-w-3xl space-y-6">
-                                    {hasSpecifications ? (
-                                        specifications.map((group, groupIndex) => (
-                                            <div key={groupIndex}>
-                                                {group.group && (
-                                                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                                                        {group.group}
-                                                    </h3>
-                                                )}
-                                                <div className="border border-border/60 rounded-lg overflow-hidden">
-                                                    {group.specs.map((spec, specIndex) => (
-                                                        <div key={specIndex}
-                                                             className={`grid grid-cols-[180px_1fr] text-sm ${
-                                                                 specIndex % 2 === 0 ? "bg-card" : "bg-muted/20"
-                                                             } ${specIndex < group.specs.length - 1 ? "border-b border-border/40" : ""}`}>
-                                                            <div className="px-4 py-2.5 text-muted-foreground font-medium border-r border-border/40">{spec.label}</div>
-                                                            <div className="px-4 py-2.5 text-foreground">{spec.value}</div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-sm text-muted-foreground py-12 text-center">
-                                            No specifications available for this product.
-                                        </p>
+                            {/* ── Reviews Section ── */}
+                            <section id="reviews">
+                                <h2 className="text-lg font-bold text-foreground mb-4">
+                                    Reviews
+                                    {reviewStats.totalReviews > 0 && (
+                                        <span className="text-sm font-normal text-muted-foreground ml-2">
+                                            ({reviewStats.totalReviews})
+                                        </span>
                                     )}
-                                </div>
-                            </div>
-                        </TabsContent>
-
-                        <TabsContent value="reviews" className="mt-6">
-                            <div className="bg-card rounded-xl border border-border/60 p-6 md:p-8">
-                                <div className="max-w-3xl">
+                                </h2>
+                                <div className="bg-card rounded-xl border border-border/60 p-5 md:p-6">
                                     <ProductReviews productId={product.id}/>
                                 </div>
-                            </div>
-                        </TabsContent>
-                    </Tabs>
+                            </section>
+                        </div>
+
+                        {/* Related Products Sidebar — desktop only */}
+                        <aside className="hidden lg:block w-64 flex-shrink-0">
+                            <RelatedProductsSidebar products={relatedProducts as any}/>
+                        </aside>
+                    </div>
                 </div>
             </div>
         </div>
