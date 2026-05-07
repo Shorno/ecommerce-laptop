@@ -10,7 +10,7 @@ export default function Providers({children}: { children: React.ReactNode }) {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <Toaster  richColors position={"top-right"}/>
+            <Toaster position="top-right" gap={8} offset={16}/>
             <ThemeProvider
                 attribute="class"
                 defaultTheme="light"

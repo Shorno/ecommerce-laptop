@@ -1,45 +1,30 @@
 "use client"
 
-import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { CheckmarkCircle02Icon, InformationCircleIcon, Alert02Icon, MultiplicationSignCircleIcon, Loading03Icon } from "@hugeicons/core-free-icons"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
-
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme="light"
       className="toaster group"
-      icons={{
-        success: (
-          <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} className="size-4" />
-        ),
-        info: (
-          <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} className="size-4" />
-        ),
-        warning: (
-          <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} className="size-4" />
-        ),
-        error: (
-          <HugeiconsIcon icon={MultiplicationSignCircleIcon} strokeWidth={2} className="size-4" />
-        ),
-        loading: (
-          <HugeiconsIcon icon={Loading03Icon} strokeWidth={2} className="size-4 animate-spin" />
-        ),
-      }}
-      style={
-        {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
-        } as React.CSSProperties
-      }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast:
+            "group toast group-[.toaster]:bg-white group-[.toaster]:text-gray-900 group-[.toaster]:border-gray-200 group-[.toaster]:shadow-lg group-[.toaster]:rounded-xl group-[.toaster]:px-4 group-[.toaster]:py-3 group-[.toaster]:text-sm group-[.toaster]:font-medium",
+          title: "group-[.toast]:text-gray-900 group-[.toast]:font-semibold group-[.toast]:text-sm",
+          description: "group-[.toast]:text-gray-500 group-[.toast]:text-xs",
+          actionButton:
+            "group-[.toast]:bg-[#ef4a23] group-[.toast]:text-white group-[.toast]:rounded-lg group-[.toast]:text-xs group-[.toast]:font-semibold group-[.toast]:px-3 group-[.toast]:py-1.5",
+          cancelButton:
+            "group-[.toast]:bg-gray-100 group-[.toast]:text-gray-600 group-[.toast]:rounded-lg group-[.toast]:text-xs group-[.toast]:font-medium",
+          success:
+            "group-[.toaster]:!bg-emerald-50 group-[.toaster]:!border-emerald-200 group-[.toaster]:!text-emerald-900 [&>[data-icon]]:!text-emerald-600",
+          error:
+            "group-[.toaster]:!bg-red-50 group-[.toaster]:!border-red-200 group-[.toaster]:!text-red-900 [&>[data-icon]]:!text-red-600",
+          warning:
+            "group-[.toaster]:!bg-amber-50 group-[.toaster]:!border-amber-200 group-[.toaster]:!text-amber-900 [&>[data-icon]]:!text-amber-600",
+          info:
+            "group-[.toaster]:!bg-blue-50 group-[.toaster]:!border-blue-200 group-[.toaster]:!text-blue-900 [&>[data-icon]]:!text-blue-600",
         },
       }}
       {...props}
