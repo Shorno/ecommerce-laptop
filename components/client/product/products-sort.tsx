@@ -44,11 +44,11 @@ export function ProductsSort({ categories = [], subCategories = [], currentCateg
 
             {/* Sort Dropdown */}
             <div className="flex items-center gap-2">
-                <Label htmlFor="sort" className="text-sm text-neutral-600 hidden sm:inline">
-                    Sort by:
+                <Label htmlFor="sort" className="text-xs text-muted-foreground hidden sm:inline whitespace-nowrap">
+                    Sort by
                 </Label>
                 <Select value={currentSort} onValueChange={handleSortChange}>
-                    <SelectTrigger id="sort" className="w-[140px] sm:w-[180px]">
+                    <SelectTrigger id="sort" className="w-[140px] sm:w-[160px] h-9 text-sm">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

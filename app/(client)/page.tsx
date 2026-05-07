@@ -6,13 +6,16 @@ import CategoryListing from "@/components/client/product/category-listing";
 import ValueProps from "@/components/home/value-props";
 import BrandShowcase from "@/components/home/brand-showcase";
 import NewsletterSection from "@/components/home/newsletter-section";
+import FlashSaleSection from "@/components/home/flash-sale-section";
+
+import HowItWorks from "@/components/home/how-it-works";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
     title: "Home",
-    description: "Discover the latest laptops, electronics, and tech accessories. Shop premium brands at the best prices at LaptopBD.",
+    description: "Shop premium refurbished laptops and electronics — quality inspected, warranty included. ROWTECH is Bangladesh's trusted source for certified used tech.",
 };
 
 export const revalidate = 3600
@@ -23,7 +26,18 @@ function SectionSkeleton() {
             <Skeleton className="h-8 w-48 mb-6" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-72 w-full rounded-lg" />
+                    <div key={i} className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+                        <Skeleton className="aspect-[4/3] w-full rounded-none" />
+                        <div className="p-3.5 space-y-2.5">
+                            <Skeleton className="h-3 w-16" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-3/4" />
+                            <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                                <Skeleton className="h-5 w-24" />
+                                <Skeleton className="h-4 w-14 rounded-full" />
+                            </div>
+                        </div>
+                    </div>
                 ))}
             </div>
         </div>
@@ -62,7 +76,7 @@ export default function HomePage() {
         "@graph": [
             {
                 "@type": "WebSite",
-                "name": "LaptopBD",
+                "name": "ROWTECH",
                 "url": siteUrl,
                 "potentialAction": {
                     "@type": "SearchAction",
@@ -72,7 +86,7 @@ export default function HomePage() {
             },
             {
                 "@type": "Organization",
-                "name": "LaptopBD",
+                "name": "ROWTECH",
                 "url": siteUrl,
                 "logo": `${siteUrl}/icon.png`,
             },
@@ -85,10 +99,17 @@ export default function HomePage() {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{__html: JSON.stringify(jsonLd).replace(/</g, "\\u003c")}}
             />
-            {/* 1. Hero Carousel + Side Banners */}
+
+            {/* 1. Hero Carousel — full-width, cinematic */}
             <FeaturedImages />
 
-            {/* 2. Browse Categories */}
+
+            {/* 2. Flash Sale — timed deals */}
+            <Suspense fallback={null}>
+                <FlashSaleSection />
+            </Suspense>
+
+            {/* 3. Browse by Category */}
             <Suspense fallback={
                 <div className="custom-container py-8">
                     <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
@@ -101,30 +122,33 @@ export default function HomePage() {
                 <CategoryGrid />
             </Suspense>
 
-            {/* 3. Featured Products */}
+            {/* 4. Top Picks — hand-selected featured products */}
             <Suspense fallback={<SectionSkeleton />}>
                 <FeaturedProducts />
             </Suspense>
 
-            {/* 4. Promotional Banners — visual break */}
+            {/* 5. How It Works — refurbishment process */}
+            <HowItWorks />
+
+            {/* 6. Promotional Banners */}
             <Suspense fallback={<PromoBannerSkeleton />}>
                 <PromoBanner />
             </Suspense>
 
-            {/* 5. Category-wise Product Listings */}
+            {/* 7. Category-wise Product Listings */}
             <Suspense fallback={<SectionSkeleton />}>
                 <CategoryListing />
             </Suspense>
 
-            {/* 6. Value Propositions — trust signals */}
+            {/* 8. Why Choose ROWTECH — trust-focused value props */}
             <ValueProps />
 
-            {/* 7. Brand Showcase */}
+            {/* 9. Brand Showcase */}
             <Suspense fallback={<BrandSkeleton />}>
                 <BrandShowcase />
             </Suspense>
 
-            {/* 8. Newsletter CTA */}
+            {/* 10. Newsletter */}
             <NewsletterSection />
         </div>
     )

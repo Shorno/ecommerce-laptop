@@ -29,7 +29,7 @@ async function getSettings(): Promise<Record<string, string>> {
 export async function generateMetadata(): Promise<Metadata> {
     const s = await getSettings()
 
-    const storeName = s.store_name || "LaptopBD"
+    const storeName = s.store_name || "ROWTECH"
     const tagline = s.store_tagline || "Your Trusted Tech Partner"
     const metaTitle = s.meta_title || `${storeName} — ${tagline}`
     const metaDescription = s.meta_description || "Shop the latest laptops, electronics, and tech accessories at the best prices in Bangladesh."

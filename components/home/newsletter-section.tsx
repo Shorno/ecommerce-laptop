@@ -21,10 +21,10 @@ export default function NewsletterSection() {
 
                         {/* Heading */}
                         <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                            Stay Updated with the Latest Deals
+                            Get Notified About Fresh Drops
                         </h2>
                         <p className="text-sm md:text-base text-white/60 mb-8">
-                            Subscribe to our newsletter and never miss out on exclusive offers, new arrivals, and tech updates.
+                            Be the first to know when premium refurbished laptops hit our store. No spam, just the good stuff.
                         </p>
 
                         {/* Form */}
@@ -48,7 +48,7 @@ export default function NewsletterSection() {
                         </div>
 
                         <p className="text-xs text-white/30 mt-4">
-                            No spam, unsubscribe at any time.
+                            Unsubscribe anytime. We respect your inbox.
                         </p>
                     </div>
                 </div>

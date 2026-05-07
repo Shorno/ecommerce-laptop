@@ -8,7 +8,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {Skeleton} from "@/components/ui/skeleton";
 import Link from "next/link";
 import {authClient} from "@/lib/auth-client";
 import type {LucideIcon} from "lucide-react";
@@ -27,7 +26,9 @@ export default function UserButton() {
     const router = useRouter()
 
     if (isPending) {
-        return <Skeleton className="size-7 rounded-full"/>;
+        return (
+            <div className="size-7 rounded-full bg-muted animate-pulse" />
+        );
     }
 
     const handleLogout = async () => {

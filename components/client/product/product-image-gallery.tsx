@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 interface ProductImageGalleryProps {
@@ -24,41 +23,39 @@ export function ProductImageGallery({
     return (
         <div className="space-y-3">
             {/* Main Image */}
-            <Card className="overflow-hidden bg-muted py-0">
-                <div className="relative w-full aspect-square max-h-[500px]">
-                    <Image
-                        src={selectedImage || "/placeholder.svg"}
-                        alt={productName}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        priority
-                    />
-                </div>
-            </Card>
+            <div className="relative w-full aspect-square max-h-[520px] rounded-xl overflow-hidden bg-white">
+                <Image
+                    src={selectedImage || "/placeholder.svg"}
+                    alt={productName}
+                    fill
+                    className="object-contain p-4"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    priority
+                />
+            </div>
 
-            {/* Thumbnail Gallery - 6 images in one row on large devices, 2 rows on mobile */}
+            {/* Thumbnail Gallery */}
             {allImages.length > 1 && (
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                <div className="flex gap-2 overflow-x-auto pb-1">
                     {allImages.map((image, index) => (
-                        <Card
+                        <button
                             key={index}
                             className={cn(
-                                "overflow-hidden py-0 cursor-pointer transition-all hover:ring-2 hover:ring-primary",
-                                selectedImage === image && "ring-2 ring-primary"
+                                "relative flex-shrink-0 w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-lg overflow-hidden bg-white border-2 transition-all duration-200",
+                                selectedImage === image
+                                    ? "border-tech-accent ring-1 ring-tech-accent/20"
+                                    : "border-transparent hover:border-border opacity-70 hover:opacity-100"
                             )}
                             onClick={() => setSelectedImage(image)}
                         >
-                            <div className="relative w-full aspect-square">
-                                <Image
-                                    src={image || "/placeholder.svg"}
-                                    alt={`${productName} - Image ${index + 1}`}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 640px) 33vw, 16vw"
-                                />
-                            </div>
-                        </Card>
+                            <Image
+                                src={image || "/placeholder.svg"}
+                                alt={`${productName} - Image ${index + 1}`}
+                                fill
+                                className="object-contain p-1"
+                                sizes="72px"
+                            />
+                        </button>
                     ))}
                 </div>
             )}

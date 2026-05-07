@@ -2,14 +2,11 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { X, Filter } from "lucide-react"
+import { X, SlidersHorizontal } from "lucide-react"
 import type { Category, SubCategory } from "@/db/schema"
 
 interface FilterClientProps {
@@ -93,30 +90,30 @@ export function FilterClient({ categories, subCategories, currentCategorySlug }:
         searchParams.get("inStock")
 
     return (
-        <Card className="sticky top-4 hidden lg:block">
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <Filter size={18} />
-                        Filters
-                    </CardTitle>
-                    {hasActiveFilters && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={clearAllFilters}
-                            className="h-8 text-xs"
-                        >
-                            <X size={14} className="mr-1" />
-                            Clear All
-                        </Button>
-                    )}
+        <div className="sticky top-20 hidden lg:block">
+            {/* Filter Header */}
+            <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <SlidersHorizontal size={15}/>
+                    Filters
                 </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
+                {hasActiveFilters && (
+                    <button
+                        onClick={clearAllFilters}
+                        className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                    >
+                        <X size={12}/>
+                        Clear
+                    </button>
+                )}
+            </div>
+
+            <div className="space-y-6">
                 {/* Price Range */}
                 <div className="space-y-3">
-                    <Label className="text-sm font-semibold">Price Range</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Price Range
+                    </Label>
                     <div className="flex items-center gap-2">
                         <Input
                             id="minPrice"
@@ -124,7 +121,7 @@ export function FilterClient({ categories, subCategories, currentCategorySlug }:
                             placeholder="Min"
                             value={minPrice}
                             onChange={(e) => setMinPrice(e.target.value)}
-                            className="h-9"
+                            className="h-9 text-sm bg-background"
                         />
                         <span className="text-muted-foreground text-xs">–</span>
                         <Input
@@ -133,23 +130,28 @@ export function FilterClient({ categories, subCategories, currentCategorySlug }:
                             placeholder="Max"
                             value={maxPrice}
                             onChange={(e) => setMaxPrice(e.target.value)}
-                            className="h-9"
+                            className="h-9 text-sm bg-background"
                         />
                     </div>
                     <Button
                         onClick={handlePriceFilter}
-                        className="w-full"
+                        variant="outline"
+                        className="w-full h-8 text-xs font-medium"
                         size="sm"
                     >
                         Apply
                     </Button>
                 </div>
 
-                {/* Stock Status */}
-                <Separator />
+                {/* Divider */}
+                <div className="h-px bg-border"/>
+
+                {/* Availability */}
                 <div className="space-y-3">
-                    <Label className="text-sm font-semibold">Availability</Label>
-                    <div className="flex items-center space-x-2">
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Availability
+                    </Label>
+                    <div className="flex items-center space-x-2.5">
                         <Checkbox
                             id="inStock"
                             checked={searchParams.get("inStock") === "true"}
@@ -157,13 +159,13 @@ export function FilterClient({ categories, subCategories, currentCategorySlug }:
                         />
                         <Label
                             htmlFor="inStock"
-                            className="text-sm font-normal cursor-pointer"
+                            className="text-sm font-normal cursor-pointer text-foreground"
                         >
                             In Stock Only
                         </Label>
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     )
 }

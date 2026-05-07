@@ -219,7 +219,7 @@ export default function SettingsForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <SettingsField label="Store Name" settingKey={K.STORE_NAME}
                                            settings={localSettings} onChange={handleChange}
-                                           placeholder="LaptopBD"/>
+                                           placeholder="ROWTECH"/>
                             <SettingsField label="Tagline" settingKey={K.STORE_TAGLINE}
                                            settings={localSettings} onChange={handleChange}
                                            placeholder="Premium Laptops & Electronics"/>
@@ -237,10 +237,10 @@ export default function SettingsForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <SettingsField label="Contact Email" settingKey={K.CONTACT_EMAIL}
                                            settings={localSettings} onChange={handleChange} type="email"
-                                           placeholder="contact@laptopbd.com"/>
+                                           placeholder="contact@rowtech.com"/>
                             <SettingsField label="Support Email" settingKey={K.SUPPORT_EMAIL}
                                            settings={localSettings} onChange={handleChange} type="email"
-                                           placeholder="support@laptopbd.com"/>
+                                           placeholder="support@rowtech.com"/>
                         </div>
                         <SettingsField label="Phone Number" settingKey={K.CONTACT_PHONE}
                                        settings={localSettings} onChange={handleChange}
@@ -302,7 +302,7 @@ export default function SettingsForm() {
                     <SettingsSection title="Search Engine Optimization" icon={Search}>
                         <SettingsField label="Meta Title" settingKey={K.META_TITLE}
                                        settings={localSettings} onChange={handleChange}
-                                       placeholder="LaptopBD — Best Laptops in Bangladesh"
+                                       placeholder="ROWTECH — Best Laptops in Bangladesh"
                                        description="Displayed in browser tabs and search results. Recommended: 50-60 characters."/>
                         <SettingsField label="Meta Description" settingKey={K.META_DESCRIPTION}
                                        settings={localSettings} onChange={handleChange} type="textarea"
@@ -322,16 +322,16 @@ export default function SettingsForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <SettingsField label="Facebook" settingKey={K.SOCIAL_FACEBOOK}
                                            settings={localSettings} onChange={handleChange} type="url"
-                                           placeholder="https://facebook.com/laptopbd"/>
+                                           placeholder="https://facebook.com/rowtech"/>
                             <SettingsField label="Instagram" settingKey={K.SOCIAL_INSTAGRAM}
                                            settings={localSettings} onChange={handleChange} type="url"
-                                           placeholder="https://instagram.com/laptopbd"/>
+                                           placeholder="https://instagram.com/rowtech"/>
                             <SettingsField label="Twitter / X" settingKey={K.SOCIAL_TWITTER}
                                            settings={localSettings} onChange={handleChange} type="url"
-                                           placeholder="https://x.com/laptopbd"/>
+                                           placeholder="https://x.com/rowtech"/>
                             <SettingsField label="YouTube" settingKey={K.SOCIAL_YOUTUBE}
                                            settings={localSettings} onChange={handleChange} type="url"
-                                           placeholder="https://youtube.com/@laptopbd"/>
+                                           placeholder="https://youtube.com/@rowtech"/>
                         </div>
                     </SettingsSection>
                 </TabsContent>
