@@ -6,6 +6,7 @@ import CategoryListing from "@/components/client/product/category-listing";
 import ValueProps from "@/components/home/value-props";
 import BrandShowcase from "@/components/home/brand-showcase";
 import NewsletterSection from "@/components/home/newsletter-section";
+import FlashSaleSection from "@/components/home/flash-sale-section";
 
 import HowItWorks from "@/components/home/how-it-works";
 import type { Metadata } from "next";
@@ -102,6 +103,11 @@ export default function HomePage() {
             {/* 1. Hero Carousel — full-width, cinematic */}
             <FeaturedImages />
 
+
+            {/* 2. Flash Sale — timed deals */}
+            <Suspense fallback={null}>
+                <FlashSaleSection />
+            </Suspense>
 
             {/* 3. Browse by Category */}
             <Suspense fallback={

@@ -4,6 +4,7 @@ import { ProductsSort } from "@/components/client/product/products-sort"
 import { getActiveCategories } from "@/app/(client)/actions/get-active-categories"
 import { getSubCategoriesByCategory } from "@/app/(client)/actions/get-subcategories-by-category"
 import {getProductReviewStats} from "@/app/actions/reviews/review-stats"
+import {getFlashSaleForProducts} from "@/app/actions/flash-sale/get-flash-sale"
 import {PackageSearch} from "lucide-react"
 
 interface ProductsGridProps {
@@ -27,7 +28,10 @@ export async function ProductsGrid({ searchParams, categoryName }: ProductsGridP
         ? await getSubCategoriesByCategory(searchParams.category)
         : []
 
-    const reviewStatsMap = await getProductReviewStats(products.map(p => p.id))
+    const [reviewStatsMap, flashSaleMap] = await Promise.all([
+        getProductReviewStats(products.map(p => p.id)),
+        getFlashSaleForProducts(products.map(p => p.id)),
+    ])
 
     return (
         <div className="space-y-5">
@@ -58,7 +62,7 @@ export async function ProductsGrid({ searchParams, categoryName }: ProductsGridP
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                     {products.map((product) => (
-                        <ProductCard key={product.id} product={product} reviewStats={reviewStatsMap[product.id]} />
+                        <ProductCard key={product.id} product={product} reviewStats={reviewStatsMap[product.id]} flashSale={flashSaleMap.get(product.id) || null} />
                     ))}
                 </div>
             )}

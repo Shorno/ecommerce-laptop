@@ -13,6 +13,7 @@ import {db} from "@/db/config"
 import RichTextDisplay from "@/components/ui/rich-text-display"
 import ProductReviews from "@/components/client/product/product-reviews"
 import {getSingleProductReviewStats} from "@/app/actions/reviews/review-stats"
+import {getFlashSaleForProduct} from "@/app/actions/flash-sale/get-flash-sale"
 
 export const revalidate = 3600
 
@@ -114,9 +115,10 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
     }
 
     // Fetch data in parallel
-    const [reviewStats, relatedProducts] = await Promise.all([
+    const [reviewStats, relatedProducts, flashSale] = await Promise.all([
         getSingleProductReviewStats(product.id),
         getRelatedProducts(product.id, product.categoryId, 6),
+        getFlashSaleForProduct(product.id),
     ])
 
     const keyFeatures = parseKeyFeatures(product.keyFeatures)
@@ -274,6 +276,7 @@ export default async function ProductDetailsPage({params}: ProductDetailsPagePro
                                 options={parsedOptions}
                                 variants={parsedVariants}
                                 isFeatured={product.isFeatured}
+                                flashSale={flashSale}
                             />
 
                             {/* Trust Badges */}

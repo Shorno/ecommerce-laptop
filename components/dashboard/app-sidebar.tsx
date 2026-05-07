@@ -26,6 +26,7 @@ import {
     StarIcon,
     BarChartIcon,
     SettingsIcon,
+    ZapIcon,
 } from "lucide-react";
 import Link from "next/link";
 import {authClient} from "@/lib/auth-client";
@@ -84,6 +85,11 @@ const navCatalog = [
         title: "Featured",
         url: "/admin/dashboard/featured",
         icon: SlidersIcon,
+    },
+    {
+        title: "Flash Sales",
+        url: "/admin/dashboard/flash-sales",
+        icon: ZapIcon,
     },
 ];
 

@@ -1,6 +1,7 @@
 import { db } from "@/db/config";
 import { ProductCard } from "@/components/client/product/product-card";
 import {getProductReviewStats} from "@/app/actions/reviews/review-stats";
+import {getFlashSaleForProducts} from "@/app/actions/flash-sale/get-flash-sale";
 
 export default async function FeaturedProducts() {
     const products = await db.query.product.findMany({
@@ -21,7 +22,10 @@ export default async function FeaturedProducts() {
 
     if (products.length === 0) return null;
 
-    const reviewStats = await getProductReviewStats(products.map(p => p.id))
+    const [reviewStats, flashSaleMap] = await Promise.all([
+        getProductReviewStats(products.map(p => p.id)),
+        getFlashSaleForProducts(products.map(p => p.id)),
+    ])
 
     return (
         <section className="py-8 md:py-12">
@@ -44,7 +48,7 @@ export default async function FeaturedProducts() {
                 {/* Products Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                     {products.map((product) => (
-                        <ProductCard key={product.id} product={product} reviewStats={reviewStats[product.id]} />
+                        <ProductCard key={product.id} product={product} reviewStats={reviewStats[product.id]} flashSale={flashSaleMap.get(product.id) || null} />
                     ))}
                 </div>
             </div>

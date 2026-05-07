@@ -12,9 +12,10 @@ interface CategorySectionProps {
         products: ProductWithRelations[]
     }
     reviewStatsMap?: Record<number, { averageRating: number; totalReviews: number }>
+    flashSaleMap?: Map<number, { discountType: string; discountValue: string; saleEndDate: Date; saleTitle: string }>
 }
 
-export function CategorySection({ category, reviewStatsMap }: CategorySectionProps) {
+export function CategorySection({ category, reviewStatsMap, flashSaleMap }: CategorySectionProps) {
     return (
         <section className="mb-10">
             {/* Category Header */}
@@ -45,6 +46,7 @@ export function CategorySection({ category, reviewStatsMap }: CategorySectionPro
                         key={product.id}
                         product={product}
                         reviewStats={reviewStatsMap?.[product.id]}
+                        flashSale={flashSaleMap?.get(product.id) || null}
                     />
                 ))}
             </div>

@@ -3,7 +3,7 @@
 import {useState} from "react"
 import {Badge} from "@/components/ui/badge"
 import {Button} from "@/components/ui/button"
-import {ShoppingCart, ShoppingBag, Plus, Minus} from "lucide-react"
+import {ShoppingCart, ShoppingBag, Plus, Minus, Zap} from "lucide-react"
 import {toast} from "sonner"
 import {useRouter} from "next/navigation"
 import {formatPrice} from "@/utils/currency"
@@ -18,9 +18,15 @@ interface ProductPageClientProps {
     options: { name: string; values: string[] }[]
     variants: { id: number; price: string; stock: number; inStock: boolean; optionValues: Record<string, string> | null }[]
     isFeatured: boolean
+    flashSale?: {
+        discountType: string
+        discountValue: string
+        saleEndDate: Date
+        saleTitle: string
+    } | null
 }
 
-export function ProductPageClient({productId, productName, productImage, options, variants, isFeatured}: ProductPageClientProps) {
+export function ProductPageClient({productId, productName, productImage, options, variants, isFeatured, flashSale}: ProductPageClientProps) {
     const session = authClient.useSession()
     const router = useRouter()
     const items = useCartItems()
@@ -30,10 +36,25 @@ export function ProductPageClient({productId, productName, productImage, options
     const [selectedVariant, setSelectedVariant] = useState<SelectedVariant | null>(null)
 
     const hasOptions = options.length > 0
-    const displayPrice = selectedVariant?.price || (variants[0]?.price) || "0"
+    const originalPrice = selectedVariant?.price || (variants[0]?.price) || "0"
     const displayStock = selectedVariant?.stock ?? (variants[0]?.stock) ?? 0
     const isInStock = selectedVariant?.inStock ?? (variants[0]?.inStock) ?? false
     const maxQuantity = displayStock
+
+    // Flash sale price calculation
+    let salePrice: string | null = null
+    let discountPercent = 0
+    if (flashSale) {
+        const original = parseFloat(originalPrice)
+        const discount = parseFloat(flashSale.discountValue)
+        const calculated = flashSale.discountType === "percentage"
+            ? Math.max(0, Math.round(original * (1 - discount / 100)))
+            : Math.max(0, Math.round(original - discount))
+        salePrice = calculated.toString()
+        discountPercent = original > 0 ? Math.round(((original - calculated) / original) * 100) : 0
+    }
+
+    const displayPrice = salePrice || originalPrice
 
     const handleIncrement = () => {
         if (quantity < maxQuantity) setQuantity(prev => prev + 1)
@@ -113,11 +134,27 @@ export function ProductPageClient({productId, productName, productImage, options
 
     return (
         <div className="space-y-5">
+            {/* Flash Sale Banner */}
+            {flashSale && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-100">
+                    <Zap className="h-4 w-4 text-red-500 fill-red-500 flex-shrink-0"/>
+                    <span className="text-sm font-semibold text-red-600">{flashSale.saleTitle}</span>
+                    <Badge className="ml-auto bg-red-500 text-white border-0 text-[10px]">-{discountPercent}%</Badge>
+                </div>
+            )}
+
             {/* Price + Stock */}
             <div className="flex items-baseline justify-between gap-4">
-                <p className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-                    {formatPrice(displayPrice)}
-                </p>
+                <div className="flex items-baseline gap-2">
+                    <p className={`text-2xl md:text-3xl font-bold tracking-tight ${flashSale ? "text-red-600" : "text-foreground"}`}>
+                        {formatPrice(displayPrice)}
+                    </p>
+                    {flashSale && (
+                        <p className="text-base text-muted-foreground line-through">
+                            {formatPrice(originalPrice)}
+                        </p>
+                    )}
+                </div>
                 {isInStock ? (
                     <Badge variant="outline" className="text-[11px] font-medium text-emerald-600 border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800">
                         In Stock ({displayStock})

@@ -1,6 +1,7 @@
 import {getCategoriesWithProducts} from "@/app/(client)/actions/get-categories-with-products";
 import {CategorySection} from "@/components/client/product/category-section";
 import {getProductReviewStats} from "@/app/actions/reviews/review-stats";
+import {getFlashSaleForProducts} from "@/app/actions/flash-sale/get-flash-sale";
 
 
 export default async function CategoryListing() {
@@ -10,7 +11,10 @@ export default async function CategoryListing() {
 
     // Batch fetch review stats for all products across categories
     const allProductIds = categoriesWithProducts.flatMap(c => c.products.map(p => p.id))
-    const reviewStatsMap = await getProductReviewStats(allProductIds)
+    const [reviewStatsMap, flashSaleMap] = await Promise.all([
+        getProductReviewStats(allProductIds),
+        getFlashSaleForProducts(allProductIds),
+    ])
 
     return (
         <div className="custom-container py-8 md:py-12">
@@ -19,6 +23,7 @@ export default async function CategoryListing() {
                     key={category.id}
                     category={category}
                     reviewStatsMap={reviewStatsMap}
+                    flashSaleMap={flashSaleMap}
                 />
             ))}
         </div>

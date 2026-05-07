@@ -1,10 +1,13 @@
 "use client"
 
+import {useState} from "react"
 import Image from "next/image"
 import Link from "next/link"
 import {Badge} from "@/components/ui/badge"
 import {formatPrice} from "@/utils/currency";
-import {Star, ShoppingCart} from "lucide-react"
+import {Star, ShoppingCart, Zap, Check} from "lucide-react"
+import {useCartActions} from "@/stote/cart-sotre"
+import {toast} from "sonner"
 
 interface ProductCardProps {
     product: {
@@ -29,23 +32,73 @@ interface ProductCardProps {
         averageRating: number
         totalReviews: number
     }
+    flashSale?: {
+        discountType: string
+        discountValue: string
+        saleEndDate: Date
+    } | null
 }
 
-export function ProductCard({product, reviewStats}: ProductCardProps) {
+export function ProductCard({product, reviewStats, flashSale}: ProductCardProps) {
     const variants = product.variants || []
     const hasVariants = variants.length > 0
     const allOutOfStock = hasVariants ? variants.every(v => !v.inStock || v.stock === 0) : true
+    const {addItem} = useCartActions()
+    const [justAdded, setJustAdded] = useState(false)
+
+    // Find cheapest in-stock variant for quick add
+    const cheapestVariant = variants
+        .filter(v => v.inStock && v.stock > 0)
+        .sort((a, b) => parseFloat(a.price) - parseFloat(b.price))[0] || null
 
     // Compute price display
     const prices = variants.map(v => parseFloat(v.price))
     const minPrice = prices.length > 0 ? Math.min(...prices) : null
     const maxPrice = prices.length > 0 ? Math.max(...prices) : null
-    const displayPrice = product.minPrice
-        ? formatPrice(product.minPrice)
-        : minPrice
-            ? formatPrice(minPrice.toString())
-            : "Price TBD"
-    const hasMultiplePrices = minPrice !== null && maxPrice !== null && minPrice !== maxPrice
+
+    const originalPrice = product.minPrice
+        ? parseFloat(product.minPrice)
+        : minPrice ?? 0
+
+    // Flash sale price calculation
+    let salePrice: number | null = null
+    let discountPercent = 0
+    if (flashSale && originalPrice > 0) {
+        const discount = parseFloat(flashSale.discountValue)
+        salePrice = flashSale.discountType === "percentage"
+            ? Math.max(0, Math.round(originalPrice * (1 - discount / 100)))
+            : Math.max(0, Math.round(originalPrice - discount))
+        discountPercent = Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+    }
+
+    const displayPrice = salePrice !== null
+        ? formatPrice(salePrice.toString())
+        : product.minPrice
+            ? formatPrice(product.minPrice)
+            : minPrice
+                ? formatPrice(minPrice.toString())
+                : "Price TBD"
+
+    const hasMultiplePrices = !flashSale && minPrice !== null && maxPrice !== null && minPrice !== maxPrice
+
+    const handleAddToCart = async (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (!cheapestVariant) return
+
+        await addItem({
+            id: product.id,
+            variantId: cheapestVariant.id,
+            variantLabel: "Default",
+            name: product.name,
+            image: product.image,
+            price: salePrice !== null ? salePrice.toString() : cheapestVariant.price,
+            maxStock: cheapestVariant.stock,
+        })
+        toast.success(`${product.name} added to cart`)
+        setJustAdded(true)
+        setTimeout(() => setJustAdded(false), 1500)
+    }
 
     return (
         <Link href={`/product/${product.slug}`} className="group block h-full">
@@ -59,7 +112,13 @@ export function ProductCard({product, reviewStats}: ProductCardProps) {
                                 Sold Out
                             </Badge>
                         )}
-                        {product.isFeatured && !allOutOfStock && (
+                        {flashSale && !allOutOfStock && (
+                            <Badge className="bg-red-500 text-white text-[10px] font-semibold px-1.5 py-0.5 border-0 shadow-sm flex items-center gap-0.5">
+                                <Zap className="h-2.5 w-2.5 fill-current"/>
+                                -{discountPercent}%
+                            </Badge>
+                        )}
+                        {product.isFeatured && !allOutOfStock && !flashSale && (
                             <Badge className="bg-tech-accent text-white text-[10px] font-semibold px-2 py-0.5 border-0 shadow-sm">
                                 Featured
                             </Badge>
@@ -76,13 +135,16 @@ export function ProductCard({product, reviewStats}: ProductCardProps) {
                         </div>
                     )}
 
-                    {/* Quick action on hover */}
-                    {!allOutOfStock && (
-                        <div className="absolute bottom-2.5 right-2.5 z-10 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                            <div className="bg-tech-accent text-white rounded-full p-2 shadow-lg">
-                                <ShoppingCart className="h-3.5 w-3.5"/>
-                            </div>
-                        </div>
+                    {/* Add to cart button */}
+                    {!allOutOfStock && cheapestVariant && (
+                        <button
+                            type="button"
+                            onClick={handleAddToCart}
+                            className="absolute bottom-2.5 right-2.5 z-10 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 bg-tech-accent text-white rounded-full p-2 shadow-lg hover:scale-110 active:scale-95 focus:outline-none"
+                            title="Add to cart"
+                        >
+                            {justAdded ? <Check className="h-3.5 w-3.5"/> : <ShoppingCart className="h-3.5 w-3.5"/>}
+                        </button>
                     )}
 
                     {/* Product Image */}
@@ -98,8 +160,8 @@ export function ProductCard({product, reviewStats}: ProductCardProps) {
                 {/* Content */}
                 <div className="flex flex-col flex-grow p-3.5 sm:p-4">
                     {/* Category */}
-                    <p className="text-[10px] sm:text-[11px] font-semibold text-tech-accent uppercase tracking-wider mb-1">
-                        {product.category.name}
+                    <p className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider mb-1 ${flashSale ? "text-red-500" : "text-tech-accent"}`}>
+                        {flashSale ? "Flash Deal" : product.category.name}
                     </p>
 
                     {/* Product Name */}
@@ -134,15 +196,22 @@ export function ProductCard({product, reviewStats}: ProductCardProps) {
                     {/* Price */}
                     <div className="pt-3 border-t border-gray-100">
                         <div className="flex items-center justify-between">
-                            <p className="text-base sm:text-lg font-bold text-gray-900">
-                                {hasMultiplePrices ? (
-                                    <>
-                                        <span className="text-gray-400 text-xs font-normal">From </span>
-                                        {displayPrice}
-                                    </>
-                                ) : displayPrice}
-                            </p>
-                            {!allOutOfStock && (
+                            <div className="flex items-baseline gap-1.5">
+                                <p className={`text-base sm:text-lg font-bold ${flashSale ? "text-red-600" : "text-gray-900"}`}>
+                                    {hasMultiplePrices ? (
+                                        <>
+                                            <span className="text-gray-400 text-xs font-normal">From </span>
+                                            {displayPrice}
+                                        </>
+                                    ) : displayPrice}
+                                </p>
+                                {flashSale && originalPrice > 0 && (
+                                    <span className="text-[10px] text-gray-400 line-through">
+                                        {formatPrice(originalPrice.toString())}
+                                    </span>
+                                )}
+                            </div>
+                            {!allOutOfStock && !flashSale && (
                                 <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
                                     In Stock
                                 </span>
